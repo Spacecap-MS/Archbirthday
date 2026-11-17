@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>건축 생년월일 아카이브 | ArchBirthday</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-paper: #f7f5f0;
+      --bg-card: #ffffff;
+      --ink-main: #1c1b18;
+      --ink-muted: #656056;
+      --line-hair: #ded8cc;
+      --accent-earth: #9e5438;
+      --accent-earth-soft: #f3eae5;
+    }
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      background-color: var(--bg-paper);
+      color: var(--ink-main);
+      background-image:
+        linear-gradient(to right, rgba(28, 27, 24, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(28, 27, 24, 0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .hairline-border {
+      border: 1px solid var(--line-hair);
+    }
+    .tab-active {
+      background-color: var(--ink-main);
+      color: #ffffff;
+    }
+    .modal-backdrop {
+      background-color: rgba(28, 27, 24, 0.45);
+      backdrop-filter: blur(2px);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-[#9e5438]/20">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <!-- Header -->
+    <header class="hairline-border bg-white/90 rounded-2xl p-5 sm:p-7 mb-6 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-stretch gap-4">
+          <div class="w-0.5 bg-[#9e5438] rounded-full shrink-0"></div>
+          <div>
+            <p class="text-xs font-semibold tracking-widest uppercase text-[#9e5438]">ArchBirthday Archive</p>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-[#1c1b18] mt-0.5">
+              건축 생년월일 아카이브
+            </h1>
+            <p class="text-sm text-[#656056] mt-1">
+              생년월일을 입력하면 같은 날 완공·개관한 현존 건축물과 건축가를 찾아줍니다.
+            </p>
+          </div>
+        </div>
+        <nav class="flex flex-wrap gap-2" aria-label="메인 탭">
+          <button type="button" data-tab="matcher" class="nav-tab tab-active px-3.5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
+            생년월일 매칭
+          </button>
+          <button type="button" data-tab="archive" class="nav-tab bg-[#f0ede6] text-[#1c1b18] hover:bg-[#e5e0d5] px-3.5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
+            전체 아카이브 <span id="archiveCountBadge" class="ml-1 text-xs opacity-75">18</span>
+          </button>
+          <button type="button" data-tab="saved" class="nav-tab bg-[#f0ede6] text-[#1c1b18] hover:bg-[#e5e0d5] px-3.5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
+            저장한 목록 <span id="savedCountBadge" class="ml-1 text-xs opacity-75">0</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Tab 1: Matcher -->
+    <main id="view-matcher" class="space-y-6">
+      <!-- Search Panel -->
+      <section class="hairline-border bg-white rounded-2xl p-5 sm:p-6 shadow-sm">
+        <form id="birthForm" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+            <div class="md:col-span-9">
+              <label for="birthDateInput" class="block text-xs font-semibold text-[#656056] uppercase tracking-wider mb-1.5">
+                생년월일 (YYYY-MM-DD)
+              </label>
+              <input
+                id="birthDateInput"
+                type="date"
+                value="2014-03-21"
+                min="1800-01-01"
+                max="2026-12-31"
+                required
+                class="w-full h-11 px-3.5 rounded-xl hairline-border bg-[#faf9f6] text-[#1c1b18] font-medium focus:outline-none focus:ring-2 focus:ring-[#9e5438]"
+              />
+            </div>
+            <div class="md:col-span-3 flex gap-2">
+              <button
+                type="submit"
+                id="searchBtn"
+                class="flex-1 h-11 px-4 rounded-xl bg-[#1c1b18] hover:bg-[#33312b] text-white text-sm font-semibold transition cursor-pointer"
+              >
+                건축물 찾기
+              </button>
+              <button
+                type="button"
+                id="randomDateBtn"
+                title="무작위 날짜 선택"
+                class="h-11 px-3.5 rounded-xl hairline-border bg-[#faf9f6] hover:bg-[#efece4] text-sm font-medium text-[#1c1b18] transition cursor-pointer"
+              >
+                랜덤
+              </button>
+            </div>
+          </div>
+
+          <div id="searchHistoryBar" class="flex flex-wrap items-center gap-2 pt-1"></div>
+        </form>
+      </section>
+
+      <!-- Status Banner -->
+      <div id="statusBanner" class="hidden rounded-xl px-4 py-3 text-sm hairline-border bg-white/90 flex items-center justify-between gap-3">
+        <span id="statusText" class="text-[#1c1b18]"></span>
+        <span id="statusBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#f0ede6] text-[#656056] shrink-0"></span>
+      </div>
+
+      <!-- Results Area -->
+      <section id="resultsSection" class="space-y-6"></section>
+    </main>
+
+    <!-- Tab 2: Full Archive -->
+    <section id="view-archive" class="hidden space-y-5">
+      <div class="hairline-border bg-white rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div class="flex-1">
+          <input
+            id="archiveSearchInput"
+            type="search"
+            placeholder="건축물 이름, 건축가, 도시, 프로그램(미술관, 도서관 등) 검색..."
+            class="w-full h-10 px-3.5 rounded-xl hairline-border bg-[#faf9f6] text-sm focus:outline-none focus:ring-2 focus:ring-[#9e5438]"
+          />
+        </div>
+        <div class="flex gap-2">
+          <button type="button" data-region="all" class="region-btn tab-active px-3 py-2 rounded-lg text-xs font-semibold transition cursor-pointer">전체</button>
+          <button type="button" data-region="korea" class="region-btn bg-[#f0ede6] text-[#1c1b18] px-3 py-2 rounded-lg text-xs font-semibold transition cursor-pointer">한국</button>
+          <button type="button" data-region="global" class="region-btn bg-[#f0ede6] text-[#1c1b18] px-3 py-2 rounded-lg text-xs font-semibold transition cursor-pointer">해외</button>
+        </div>
+      </div>
+      <div id="archiveGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- Tab 3: Saved -->
+    <section id="view-saved" class="hidden space-y-4">
+      <div class="hairline-border bg-white rounded-2xl p-5 shadow-sm flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold">저장한 건축물</h2>
+          <p class="text-xs text-[#656056] mt-0.5">관심 있는 건축물을 북마크해 모아볼 수 있습니다.</p>
+        </div>
+        <button type="button" id="clearSavedBtn" class="text-xs font-semibold px-3 py-1.5 rounded-lg hairline-border hover:bg-[#f0ede6] text-[#656056] cursor-pointer">
+          모두 비우기
+        </button>
+      </div>
+      <div id="savedGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- Data Scope Footer -->
+    <footer class="mt-10 pt-5 border-t border-[#ded8cc] text-xs text-[#656056] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <p>
+        내장 아카이브(ArchDaily·공식 자료 기반 검증 건축물 37선)와 <a href="https://query.wikidata.org/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#1c1b18]">Wikidata SPARQL</a> 공개 데이터를 함께 조회합니다.
+      </p>
+      <p>완공일 및 개관일(YYYY-MM-DD) 기준 매칭</p>
+    </footer>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="bg-white hairline-border rounded-2xl max-w-lg w-full p-6 shadow-xl relative">
+      <button type="button" id="closeModalBtn" aria-label="닫기" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0ede6] hover:bg-[#e2ddd3] flex items-center justify-center text-sm font-bold cursor-pointer">
+        ✕
+      </button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-[#1c1b18] text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg"></div>
+
+  <script>
+    const CURATED_BUILDINGS = [
+      {
+        id: 'eiffel-tower',
+        nameKo: '에펠탑',
+        nameEn: 'Eiffel Tower',
+        date: '1889-03-31',
+        architect: '귀스타브 에펠 (Gustave Eiffel)',
+        location: '파리, 프랑스',
+        address: 'Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France',
+        postalCode: '75007',
+        region: 'global',
+        program: '전망대 · 기념탑',
+        hours: '월: 09:00 – 24:00 / 화: 09:00 – 24:00 / 수: 09:00 – 24:00 / 목: 09:00 – 24:00 / 금: 09:00 – 24:00 / 토: 09:00 – 24:00 / 일: 09:00 – 24:00',
+        officialUrl: 'https://www.toureiffel.paris/en',
+        note: '1889년 파리 만국박람회를 위해 세워진 철골 격자 구조의 랜드마크로, 3월 31일 공식 준공식을 가졌습니다.',
+        url: 'https://en.wikipedia.org/wiki/Eiffel_Tower'
+      },
+      {
+        id: 'empire-state',
+        nameKo: '엠파이어 스테이트 빌딩',
+        nameEn: 'Empire State Building',
+        date: '1931-05-01',
+        architect: '슈리브, 램 & 하몬 (Shreve, Lamb & Harmon)',
+        location: '뉴욕, 미국',
+        address: '20 West 34th Street, New York, NY 10001, USA',
+        postalCode: '10001',
+        region: 'global',
+        program: '오피스 · 전망대',
+        hours: '월: 10:00 – 22:00 / 화: 10:00 – 22:00 / 수: 10:00 – 22:00 / 목: 10:00 – 22:00 / 금: 09:00 – 22:00 / 토: 09:00 – 22:00 / 일: 09:00 – 22:00',
+        officialUrl: 'https://www.esbnyc.com/',
+        note: '아르 데코(Art Deco) 양식을 대표하는 마천루로, 착공 1년 45일 만인 1931년 5월 1일 공식 개장했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Empire_State_Building'
+      },
+      {
+        id: 'sydney-opera',
+        nameKo: '시드니 오페라 하우스',
+        nameEn: 'Sydney Opera House',
+        date: '1973-10-20',
+        architect: '이외른 웃존 (Jørn Utzon)',
+        location: '시드니, 호주',
+        address: 'Bennelong Point, Sydney NSW 2000, Australia',
+        postalCode: '2000',
+        region: 'global',
+        program: '공연장 · 오페라 하우스',
+        hours: '월: 09:00 – 17:00 (공연 시간 별도) / 화: 09:00 – 17:00 (공연 시간 별도) / 수: 09:00 – 17:00 (공연 시간 별도) / 목: 09:00 – 17:00 (공연 시간 별도) / 금: 09:00 – 17:00 (공연 시간 별도) / 토: 09:00 – 17:00 (공연 시간 별도) / 일: 09:00 – 17:00 (공연 시간 별도)',
+        officialUrl: 'https://www.sydneyoperahouse.com/',
+        note: '조개껍질 형태의 프리캐스트 콘크리트 쉘 지붕이 특징이며, 1973년 10월 20일 공식 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Sydney_Opera_House'
+      },
+      {
+        id: 'centre-pompidou',
+        nameKo: '퐁피두 센터',
+        nameEn: 'Centre Pompidou',
+        date: '1977-01-31',
+        architect: '렌조 피아노 & 리처드 로저스 (Renzo Piano & Richard Rogers)',
+        location: '파리, 프랑스',
+        address: 'Place Georges-Pompidou, 75004 Paris, France',
+        postalCode: '75004',
+        region: 'global',
+        program: '복합문화공간 · 미술관 · 도서관',
+        hours: '임시 휴관 (리모델링)',
+        officialUrl: 'https://www.centrepompidou.fr/en/',
+        note: '구조체와 설비 배관을 외부로 노출한 하이테크 건축의 기념비적 작품으로, 1977년 1월 31일 개관했습니다.',
+        url: 'https://www.britannica.com/topic/Pompidou-Centre'
+      },
+      {
+        id: 'louvre-pyramid',
+        nameKo: '루브르 피라미드',
+        nameEn: 'Louvre Pyramid',
+        date: '1989-03-29',
+        architect: 'I. M. 페이 (I. M. Pei)',
+        location: '파리, 프랑스',
+        address: 'Cour Napoléon, Rue de Rivoli, 75001 Paris, France',
+        postalCode: '75001',
+        region: 'global',
+        program: '미술관 (주 출입구 파빌리온)',
+        hours: '월: 09:00 – 18:00 / 화: 휴관 / 수: 09:00 – 21:45 / 목: 09:00 – 18:00 / 금: 09:00 – 21:45 / 토: 09:00 – 18:00 / 일: 09:00 – 18:00',
+        officialUrl: 'https://www.louvre.fr/en',
+        note: '고전적인 루브르 궁전 중앙 안뜰에 유리와 철골로 구성된 기하학적 피라미드를 배치해 1989년 3월 29일 개관했습니다.',
+        url: 'https://www.louvre.fr/en/explore/the-palace/a-pyramid-for-a-symbol'
+      },
+      {
+        id: 'guggenheim-bilbao',
+        nameKo: '구겐하임 미술관 빌바오',
+        nameEn: 'Guggenheim Museum Bilbao',
+        date: '1997-10-18',
+        architect: '프랭크 게리 (Frank Gehry)',
+        location: '빌바오, 스페인',
+        address: 'Abandoibarra Etorbidea 2, Abando, 48009 Bilbao, Bizkaia, Spain',
+        postalCode: '48009',
+        region: 'global',
+        program: '미술관',
+        hours: '월: 휴관 / 화: 10:00 – 19:00 / 수: 10:00 – 19:00 / 목: 10:00 – 19:00 / 금: 10:00 – 19:00 / 토: 10:00 – 19:00 / 일: 10:00 – 19:00',
+        note: '티타늄 패널의 유선형 볼륨으로 도시 재생의 상징(빌바오 효과)이 된 해체주의 건축물입니다.',
+        url: 'https://en.wikipedia.org/wiki/Guggenheim_Museum_Bilbao'
+      },
+      {
+        id: 'petronas-towers',
+        nameKo: '페트로나스 트윈 타워',
+        nameEn: 'Petronas Towers',
+        date: '1999-08-31',
+        architect: '시저 펠리 (César Pelli)',
+        location: '쿠알라룸푸르, 말레이시아',
+        address: 'Petronas Twin Tower, Kuala Lumpur City Centre, 50088 Kuala Lumpur, Malaysia',
+        postalCode: '50088',
+        region: 'global',
+        program: '오피스 · 복합 타워',
+        hours: '월: 휴관 / 화: 09:00 – 21:00 / 수: 09:00 – 21:00 / 목: 09:00 – 21:00 / 금: 09:00 – 21:00 / 토: 09:00 – 21:00 / 일: 09:00 – 21:00',
+        officialUrl: 'https://www.petronastwintowers.com.my/',
+        note: '이슬람 기하학의 8각 별 패턴 평면을 적용한 초고층 쌍둥이 빌딩으로, 말레이시아 독립기념일인 1999년 8월 31일 공식 개장했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Petronas_Towers'
+      },
+      {
+        id: 'incheon-airport',
+        nameKo: '인천국제공항 (제1여객터미널)',
+        nameEn: 'Incheon International Airport',
+        date: '2001-03-29',
+        architect: '커티스 펜트리스 (Fentress Architects)',
+        location: '인천, 대한민국',
+        address: '인천광역시 중구 공항로 272',
+        postalCode: '23358',
+        region: 'korea',
+        program: '공항 터미널',
+        hours: '월: 00:00 – 24:00 (연중무휴) / 화: 00:00 – 24:00 (연중무휴) / 수: 00:00 – 24:00 (연중무휴) / 목: 00:00 – 24:00 (연중무휴) / 금: 00:00 – 24:00 (연중무휴) / 토: 00:00 – 24:00 (연중무휴) / 일: 00:00 – 24:00 (연중무휴)',
+        note: '한국 전통 처마의 곡선미를 지붕 구조에 반영한 관문 공항으로, 2001년 3월 29일 개항했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Incheon_International_Airport'
+      },
+      {
+        id: 'seattle-central-library',
+        nameKo: '시애틀 중앙 도서관',
+        nameEn: 'Seattle Central Library',
+        date: '2004-05-23',
+        architect: '렘 콜하스 & 조슈아 프린스-라무스 / OMA + LMN Architects',
+        location: '시애틀, 미국',
+        address: '1000 Fourth Avenue, Seattle, WA 98104, USA',
+        postalCode: '98104',
+        region: 'global',
+        program: '도서관',
+        hours: '월: 10:00 – 18:00 / 화: 10:00 – 20:00 / 수: 10:00 – 20:00 / 목: 10:00 – 20:00 / 금: 10:00 – 18:00 / 토: 10:00 – 18:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://www.spl.org/',
+        note: '다이아몬드 격자형 철골·유리 외피와 4개 층을 연속으로 잇는 북 스파이럴(Book Spiral) 구조로 21세기 도서관의 개념을 재정의한 건축물로, 2004년 5월 23일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Seattle_Central_Library'
+      },
+      {
+        id: 'walt-disney-hall',
+        nameKo: '월트 디즈니 콘서트홀',
+        nameEn: 'Walt Disney Concert Hall',
+        date: '2003-10-23',
+        architect: '프랭크 게리 (Frank Gehry)',
+        location: '로스앤젤레스, 미국',
+        address: '111 South Grand Avenue, Los Angeles, CA 90012, USA',
+        postalCode: '90012',
+        region: 'global',
+        program: '공연장 · 콘서트홀',
+        hours: '공연 일정에 따라 운영',
+        officialUrl: 'https://www.laphil.com/about-us/our-venues/about-walt-disney-concert-hall',
+        note: '스테인리스 스틸 곡면 외피와 빈야드(Vineyard) 스타일 음향 홀이 조화를 이루는 공연장입니다.',
+        url: 'https://en.wikipedia.org/wiki/Walt_Disney_Concert_Hall'
+      },
+      {
+        id: 'kanazawa-21',
+        nameKo: '가나자와 21세기 미술관',
+        nameEn: '21st Century Museum of Contemporary Art, Kanazawa',
+        date: '2004-10-09',
+        architect: 'SANAA (세지마 가즈요 & 니시자와 류에)',
+        location: '가나자와, 일본',
+        address: '1-2-1 Hirosaka, Kanazawa, Ishikawa 920-8509, Japan',
+        postalCode: '920-8509',
+        region: 'global',
+        program: '미술관',
+        hours: '월: 휴관 / 화: 09:30 – 22:00 / 수: 09:30 – 22:00 / 목: 09:30 – 22:00 / 금: 09:30 – 22:00 / 토: 09:30 – 22:00 / 일: 09:30 – 22:00',
+        officialUrl: 'https://www.kanazawa21.jp/en/',
+        note: '정면과 후면의 구분이 없는 지름 112.5m 원형 유리 파빌리온으로, 도시 공원처럼 열린 미술관을 구현했습니다.',
+        url: 'https://en.wikipedia.org/wiki/21st_Century_Museum_of_Contemporary_Art,_Kanazawa'
+      },
+      {
+        id: 'taipei-101',
+        nameKo: '타이베이 101',
+        nameEn: 'Taipei 101',
+        date: '2004-12-31',
+        architect: 'C. Y. 리 (C. Y. Lee & Partners)',
+        location: '타이베이, 대만',
+        address: 'No. 7, Section 5, Xinyi Road, Xinyi District, Taipei 110, Taiwan',
+        postalCode: '110',
+        region: 'global',
+        program: '오피스 · 전망대 · 상업시설',
+        hours: '월: 11:00 – 21:30 / 화: 11:00 – 21:30 / 수: 11:00 – 21:30 / 목: 11:00 – 21:30 / 금: 11:00 – 22:00 / 토: 11:00 – 22:00 / 일: 11:00 – 21:30',
+        officialUrl: 'https://www.taipei-101.com.tw/en/',
+        note: '대나무 마디에서 영감을 얻은 8단 모듈 외관과 대형 동조질량감쇠기(TMD)를 갖춘 마천루입니다.',
+        url: 'https://en.wikipedia.org/wiki/Taipei_101'
+      },
+      {
+        id: 'burj-khalifa',
+        nameKo: '부르즈 할리파',
+        nameEn: 'Burj Khalifa',
+        date: '2010-01-04',
+        architect: '에이드리언 스미스 / SOM (Adrian Smith / SOM)',
+        location: '두바이, 아랍에미리트',
+        address: '1 Sheikh Mohammed bin Rashid Boulevard, Downtown Dubai, Dubai, UAE',
+        postalCode: '없음 (UAE)',
+        region: 'global',
+        program: '초고층 복합 (주거 · 호텔 · 오피스 · 전망대)',
+        hours: '월: 00:00 – 24:00 (전망대 별도 운영) / 화: 00:00 – 24:00 (전망대 별도 운영) / 수: 00:00 – 24:00 (전망대 별도 운영) / 목: 00:00 – 24:00 (전망대 별도 운영) / 금: 00:00 – 24:00 (전망대 별도 운영) / 토: 00:00 – 24:00 (전망대 별도 운영) / 일: 00:00 – 24:00 (전망대 별도 운영)',
+        note: '828m 높이의 세계 최고층 건축물로, 사막의 히메노칼리스(Hymenocallis) 꽃에서 착안한 Y자형 평면 구조를 채택했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Burj_Khalifa'
+      },
+      {
+        id: 'marina-bay-sands',
+        nameKo: '마리나 베이 샌즈',
+        nameEn: 'Marina Bay Sands',
+        date: '2010-06-23',
+        architect: '모셰 사프디 (Moshe Safdie)',
+        location: '싱가포르',
+        address: '10 Bayfront Avenue, Singapore 018956',
+        postalCode: '018956',
+        region: 'global',
+        program: '복합 리조트 · 호텔',
+        hours: '월: 00:00 – 24:00 (스카이파크 09:30 – 22:00) / 화: 00:00 – 24:00 (스카이파크 09:30 – 22:00) / 수: 00:00 – 24:00 (스카이파크 09:30 – 22:00) / 목: 00:00 – 24:00 (스카이파크 09:30 – 22:00) / 금: 00:00 – 24:00 (스카이파크 09:30 – 22:00) / 토: 00:00 – 24:00 (스카이파크 09:30 – 22:00) / 일: 00:00 – 24:00 (스카이파크 09:30 – 22:00)',
+        officialUrl: 'https://www.marinabaysands.com/',
+        note: '세 개의 경사진 호텔 타워 상단을 스카이파크로 연결한 복합 리조트 건축물입니다.',
+        url: 'https://en.wikipedia.org/wiki/Marina_Bay_Sands'
+      },
+      {
+        id: 'heydar-aliyev',
+        nameKo: '헤이다르 알리예프 센터',
+        nameEn: 'Heydar Aliyev Center',
+        date: '2012-05-10',
+        architect: '자하 하디드 (Zaha Hadid Architects)',
+        location: '바쿠, 아제르바이잔',
+        address: '1 Heydər Əliyev prospekti, Bakı 1033, Azerbaijan',
+        postalCode: '1033',
+        region: 'global',
+        program: '복합문화센터 · 미술관 · 공연장',
+        hours: '월: 휴관 / 화: 10:30 – 18:00 / 수: 10:30 – 18:00 / 목: 10:30 – 18:00 / 금: 10:30 – 18:00 / 토: 10:30 – 17:00 / 일: 10:30 – 17:00',
+        note: '기둥과 벽의 경계를 지우고 대지에서 솟아오르는 연속 곡면으로 설계된 문화센터입니다.',
+        url: 'https://en.wikipedia.org/wiki/Heydar_Aliyev_Center'
+      },
+      {
+        id: 'museum-san',
+        nameKo: '뮤지엄 산 (Museum SAN)',
+        nameEn: 'Museum SAN',
+        date: '2013-05-16',
+        architect: '안도 타다오 (Tadao Ando)',
+        location: '원주, 대한민국',
+        address: '강원특별자치도 원주시 지정면 오크밸리2길 260',
+        postalCode: '26357',
+        region: 'korea',
+        program: '미술관 · 명상관',
+        hours: '월: 휴관 / 화: 10:00 – 18:00 / 수: 10:00 – 18:00 / 목: 10:00 – 18:00 / 금: 10:00 – 18:00 / 토: 10:00 – 18:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://www.museumsan.org/',
+        note: '노출 콘크리트와 물의 정원, 빛의 시퀀스가 산악 지형과 어우러진 공간 예술 미술관입니다.',
+        url: 'https://en.wikipedia.org/wiki/Museum_SAN'
+      },
+      {
+        id: 'ddp',
+        nameKo: '동대문디자인플라자 (DDP)',
+        nameEn: 'Dongdaemun Design Plaza',
+        date: '2014-03-21',
+        architect: '자하 하디드 & 삼우설계 (Zaha Hadid & Samoo)',
+        location: '서울, 대한민국',
+        address: '서울특별시 중구 을지로 281',
+        postalCode: '04566',
+        region: 'korea',
+        program: '복합문화공간 · 전시관',
+        hours: '월: 10:00 – 20:00 / 화: 10:00 – 20:00 / 수: 10:00 – 20:00 / 목: 10:00 – 20:00 / 금: 10:00 – 20:00 / 토: 10:00 – 20:00 / 일: 10:00 – 20:00',
+        officialUrl: 'https://ddp.or.kr/',
+        note: '45,133장의 알루미늄 외장 패널로 이루어진 비정형 3차원 곡면 건축물로 2014년 3월 21일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Dongdaemun_Design_Plaza'
+      },
+      {
+        id: 'fondation-lv',
+        nameKo: '루이 비통 재단 미술관',
+        nameEn: 'Fondation Louis Vuitton',
+        date: '2014-10-20',
+        architect: '프랭크 게리 (Frank Gehry)',
+        location: '파리, 프랑스',
+        address: '8 Avenue du Mahatma Gandhi, 75116 Paris, France',
+        postalCode: '75116',
+        region: 'global',
+        program: '미술관 · 문화재단',
+        hours: '월: 11:00 – 20:00 / 화: 휴관 / 수: 11:00 – 20:00 / 목: 11:00 – 20:00 / 금: 11:00 – 21:00 / 토: 10:00 – 20:00 / 일: 10:00 – 20:00',
+        officialUrl: 'https://www.fondationlouisvuitton.fr/en',
+        note: '12개의 거대한 유리 돛이 바람을 머금은 듯한 조형미를 지닌 파리 불로뉴 숲의 현대미술관입니다.',
+        url: 'https://en.wikipedia.org/wiki/Louis_Vuitton_Foundation'
+      },
+      {
+        id: 'lotte-world-tower',
+        nameKo: '롯데월드타워',
+        nameEn: 'Lotte World Tower',
+        date: '2017-04-03',
+        architect: 'KPF (Kohn Pedersen Fox)',
+        location: '서울, 대한민국',
+        address: '서울특별시 송파구 올림픽로 300',
+        postalCode: '05551',
+        region: 'korea',
+        program: '초고층 복합 (오피스 · 호텔 · 전망대)',
+        hours: '월: 10:30 – 22:00 / 화: 10:30 – 22:00 / 수: 10:30 – 22:00 / 목: 10:30 – 22:00 / 금: 10:30 – 22:00 / 토: 10:30 – 22:00 / 일: 10:30 – 22:00',
+        officialUrl: 'https://www.lwt.co.kr/en/',
+        note: '한국 전통 도자기와 붓의 곡선에서 영감을 받은 123층, 555m 높이의 대한민국 최고층 랜드마크입니다.',
+        url: 'https://en.wikipedia.org/wiki/Lotte_World_Tower'
+      },
+      {
+        id: 'chrysler-building',
+        nameKo: '크라이슬러 빌딩',
+        nameEn: 'Chrysler Building',
+        date: '1930-05-27',
+        architect: '윌리엄 밴 앨런 (William Van Alen)',
+        location: '뉴욕, 미국',
+        address: '405 Lexington Avenue, New York, NY 10174, USA',
+        postalCode: '10174',
+        region: 'global',
+        program: '오피스',
+        hours: '오피스 빌딩 (내부 일반 관람 제한)',
+        note: '아르 데코 양식의 정수를 보여주는 마천루로, 1930년 5월 27일 완공 당시 세계 최고층 빌딩에 올랐습니다.',
+        url: 'https://en.wikipedia.org/wiki/Chrysler_Building'
+      },
+      {
+        id: '63-building',
+        nameKo: '63빌딩 (63 스퀘어)',
+        nameEn: '63 Building',
+        date: '1985-07-27',
+        architect: 'SOM & 박춘명 (Skidmore, Owings & Merrill & Park Chun-myung)',
+        location: '서울, 대한민국',
+        address: '서울특별시 영등포구 63로 50',
+        postalCode: '07345',
+        region: 'korea',
+        program: '오피스 · 전망대 · 문화시설',
+        hours: '월: 10:00 – 20:30 (시설별 상이) / 화: 10:00 – 20:30 (시설별 상이) / 수: 10:00 – 20:30 (시설별 상이) / 목: 10:00 – 20:30 (시설별 상이) / 금: 10:00 – 20:30 (시설별 상이) / 토: 10:00 – 20:30 (시설별 상이) / 일: 10:00 – 20:30 (시설별 상이)',
+        officialUrl: 'https://www.63building.co.kr/en',
+        note: '한강 여의도 스카이라인을 상징하는 황금빛 유리 커튼월 마천루로 1985년 7월 27일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/63_Building'
+      },
+      {
+        id: 'sendai-mediatheque',
+        nameKo: '센다이 미디어테크',
+        nameEn: 'Sendai Mediatheque',
+        date: '2000-08-10',
+        architect: '이토 도요 (Toyo Ito)',
+        location: '센다이, 일본',
+        address: '2-1 Kasugamachi, Aoba Ward, Sendai, Miyagi 980-0821, Japan',
+        postalCode: '980-0821',
+        region: 'global',
+        program: '도서관 · 미술관 · 복합미디어센터',
+        hours: '월: 09:00 – 21:00 (도서관 10:00 – 20:00) / 화: 09:00 – 21:00 (도서관 10:00 – 20:00) / 수: 09:00 – 21:00 (도서관 10:00 – 20:00) / 목: 09:00 – 21:00 (도서관 10:00 – 20:00) / 금: 09:00 – 21:00 (도서관 10:00 – 20:00) / 토: 09:00 – 21:00 (도서관 10:00 – 18:00) / 일: 09:00 – 21:00 (도서관 10:00 – 18:00)',
+        officialUrl: 'https://www.smt.city.sendai.jp/',
+        note: '13개의 강철 튜브 기둥과 얇은 슬래브, 투명 유리 외피로 벽 없는 유동적 공간을 구현해 2000년 8월 10일 완공되었습니다.',
+        url: 'https://en.wikipedia.org/wiki/Sendai_Mediatheque'
+      },
+      {
+        id: 'the-shard',
+        nameKo: '더 샤드',
+        nameEn: 'The Shard',
+        date: '2013-02-01',
+        architect: '렌조 피아노 (Renzo Piano)',
+        location: '런던, 영국',
+        address: '32 London Bridge Street, London SE1 9SG, UK',
+        postalCode: 'SE1 9SG',
+        region: 'global',
+        program: '초고층 복합 (오피스 · 호텔 · 주거 · 전망대)',
+        hours: '월: 전망대 휴무 / 화: 전망대 휴무 / 수: 전망대 11:00 – 19:00 / 목: 전망대 11:00 – 19:00 / 금: 전망대 11:00 – 19:00 / 토: 전망대 10:00 – 22:00 / 일: 전망대 11:00 – 19:00',
+        officialUrl: 'https://www.the-shard.com/',
+        note: '유리 파편이 하늘로 솟아오르는 듯한 72층 피라미드형 타워로 2013년 2월 1일 일반에 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/The_Shard'
+      },
+      {
+        id: 'one-wtc',
+        nameKo: '원 월드 트레이드 센터',
+        nameEn: 'One World Trade Center',
+        date: '2014-11-03',
+        architect: '데이비드 차일즈 / SOM (David Childs / SOM)',
+        location: '뉴욕, 미국',
+        address: '285 Fulton Street, New York, NY 10007, USA',
+        postalCode: '10007',
+        region: 'global',
+        program: '오피스 · 전망대',
+        hours: '월: 전망대 09:00 – 21:00 / 화: 전망대 09:00 – 21:00 / 수: 전망대 09:00 – 21:00 / 목: 전망대 09:00 – 21:00 / 금: 전망대 09:00 – 21:00 / 토: 전망대 09:00 – 21:00 / 일: 전망대 09:00 – 21:00',
+        officialUrl: 'https://www.oneworldobservatory.com/',
+        note: '미국 독립 연도를 상징하는 1,776피트(541m) 높이의 마천루로 2014년 11월 3일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/One_World_Trade_Center'
+      },
+      {
+        id: 'elbphilharmonie',
+        nameKo: '엘브필하모니',
+        nameEn: 'Elbphilharmonie',
+        date: '2017-01-11',
+        architect: '헤르조그 & 드 뫼롱 (Herzog & de Meuron)',
+        location: '함부르크, 독일',
+        address: 'Platz der Deutschen Einheit 4, 20457 Hamburg, Germany',
+        postalCode: '20457',
+        region: 'global',
+        program: '공연장 · 콘서트홀 · 호텔 · 주거',
+        hours: '공연 및 플라자 운영 시간 상이',
+        officialUrl: 'https://www.elbphilharmonie.de/en/',
+        note: '기존 벽돌 창고 위에 물결치는 유리 파사드를 얹은 콘서트홀로 2017년 1월 11일 공식 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Elbphilharmonie'
+      },
+      {
+        id: 'louvre-abu-dhabi',
+        nameKo: '루브르 아부다비',
+        nameEn: 'Louvre Abu Dhabi',
+        date: '2017-11-11',
+        architect: '장 누벨 (Jean Nouvel)',
+        location: '아부다비, 아랍에미리트',
+        address: 'Saadiyat Cultural District, Saadiyat Island, Abu Dhabi, UAE',
+        postalCode: '없음 (UAE)',
+        region: 'global',
+        program: '미술관',
+        hours: '월: 10:00 – 18:30 / 화: 10:00 – 18:30 / 수: 10:00 – 18:30 / 목: 10:00 – 18:30 / 금: 10:00 – 20:30 / 토: 10:00 – 20:30 / 일: 10:00 – 20:30',
+        note: '기하학적 패턴의 거대한 돔 사이로 빛의 비(Rain of Light)가 쏟아지는 해양 미술관으로 2017년 11월 11일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Louvre_Abu_Dhabi'
+      },
+      {
+        id: 'guggenheim-ny',
+        nameKo: '솔로몬 R. 구겐하임 미술관',
+        nameEn: 'Solomon R. Guggenheim Museum',
+        date: '1959-10-21',
+        architect: '프랭크 로이드 라이트 (Frank Lloyd Wright)',
+        location: '뉴욕, 미국',
+        address: '1071 Fifth Avenue, New York, NY 10128, USA',
+        postalCode: '10128',
+        region: 'global',
+        program: '미술관',
+        hours: '월: 10:30 – 17:30 / 화: 10:30 – 17:30 / 수: 10:30 – 17:30 / 목: 10:30 – 17:30 / 금: 10:30 – 17:30 / 토: 10:30 – 17:30 / 일: 10:30 – 17:30',
+        officialUrl: 'https://www.guggenheim.org/',
+        note: '연속적인 나선형 경사로와 천창 아트리움으로 전시 공간의 개념을 바꾼 모더니즘 미술관으로 1959년 10월 21일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Solomon_R._Guggenheim_Museum'
+      },
+      {
+        id: 'milwaukee-art-museum',
+        nameKo: '밀워키 아트 뮤지엄 (콰드라치 파빌리온)',
+        nameEn: 'Milwaukee Art Museum (Quadracci Pavilion)',
+        date: '2001-05-04',
+        architect: '산티아고 칼라트라바 (Santiago Calatrava)',
+        location: '밀워키, 미국',
+        address: '700 North Art Museum Drive, Milwaukee, WI 53202, USA',
+        postalCode: '53202',
+        region: 'global',
+        program: '미술관 · 파빌리온',
+        hours: '월: 휴관 / 화: 휴관 / 수: 10:00 – 17:00 / 목: 10:00 – 20:00 / 금: 10:00 – 17:00 / 토: 10:00 – 17:00 / 일: 10:00 – 17:00',
+        officialUrl: 'https://mam.org/',
+        note: '새의 날개처럼 여닫히는 키네틱 브리즈 솔레이유(Burke Brise Soleil) 지붕 구조로 유명한 파빌리온으로 2001년 5월 4일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Milwaukee_Art_Museum'
+      },
+      {
+        id: 'leeum-museum',
+        nameKo: '리움미술관',
+        nameEn: 'Leeum Museum of Art',
+        date: '2004-10-13',
+        architect: '마리오 보타, 장 누벨, 렘 콜하스 (Mario Botta, Jean Nouvel, Rem Koolhaas)',
+        location: '서울, 대한민국',
+        address: '서울특별시 용산구 이태원로55길 60-16',
+        postalCode: '04348',
+        region: 'korea',
+        program: '미술관',
+        hours: '월: 휴관 / 화: 10:00 – 18:00 / 수: 10:00 – 18:00 / 목: 10:00 – 18:00 / 금: 10:00 – 18:00 / 토: 10:00 – 18:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://www.leeum.org/',
+        note: '세 명의 세계적 건축가가 전통미술·현대미술·아동교육문화센터를 각각 설계해 하나의 캠퍼스로 구성한 미술관으로 2004년 10월 13일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/Leeum_Museum_of_Art'
+      },
+      {
+        id: 'nact-tokyo',
+        nameKo: '도쿄 국립신미술관',
+        nameEn: 'The National Art Center, Tokyo',
+        date: '2007-01-21',
+        architect: '구로카와 기쇼 (Kisho Kurokawa)',
+        location: '도쿄, 일본',
+        address: '7-22-2 Roppongi, Minato City, Tokyo 106-8558, Japan',
+        postalCode: '106-8558',
+        region: 'global',
+        program: '미술관 · 전시센터',
+        hours: '월: 10:00 – 18:00 / 화: 휴관 / 수: 10:00 – 18:00 / 목: 10:00 – 18:00 / 금: 10:00 – 20:00 / 토: 10:00 – 20:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://www.nact.jp/',
+        note: '물결치는 유리 커튼월 파사드와 거대한 역원뿔형 아트리움이 특징인 일본 최대 규모의 전시 센터로 2007년 1월 21일 개관했습니다.',
+        url: 'https://en.wikipedia.org/wiki/The_National_Art_Center,_Tokyo'
+      },
+      {
+        id: 'oslo-opera-house',
+        nameKo: '오슬로 오페라 하우스',
+        nameEn: 'Oslo Opera House',
+        date: '2008-04-12',
+        architect: '스뇌헤타 (Snøhetta)',
+        location: '오슬로, 노르웨이',
+        address: 'Kirsten Flagstads plass 1, 0150 Oslo, Norway',
+        postalCode: '0150',
+        region: 'global',
+        program: '공연장 · 오페라 하우스',
+        hours: '월: 11:00 – 22:00 / 화: 11:00 – 22:00 / 수: 11:00 – 22:00 / 목: 11:00 – 22:00 / 금: 11:00 – 22:00 / 토: 11:00 – 22:00 / 일: 12:00 – 22:00',
+        officialUrl: 'https://operaen.no/',
+        note: '피오르드 수면에서 솟아오르는 흰 대리석 경사 지붕을 시민 광장으로 개방해 미스 반 데어 로에 상을 수상했으며 2008년 4월 12일 개관했습니다.',
+        url: 'https://www.archdaily.com/20953/oslo-opera-house-wins-mies-van-der-rohe-award'
+      },
+      {
+        id: 'pompidou-metz',
+        nameKo: '퐁피두 메스',
+        nameEn: 'Centre Pompidou-Metz',
+        date: '2010-05-12',
+        architect: '반 시게루 & 장 드 가스틴 (Shigeru Ban & Jean de Gastines)',
+        location: '메스, 프랑스',
+        address: '1 Parvis des Droits de l\x27Homme, 57000 Metz, France',
+        postalCode: '57000',
+        region: 'global',
+        program: '미술관 · 현대예술센터',
+        hours: '월: 10:00 – 18:00 / 화: 휴관 / 수: 10:00 – 18:00 / 목: 10:00 – 18:00 / 금: 10:00 – 18:00 / 토: 10:00 – 18:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://www.centrepompidou-metz.fr/',
+        note: '육각형 목재 격자 지붕과 직교하는 세 개의 전시 튜브가 도시와 시각적 축을 형성하는 미술관으로 2010년 5월 12일 개관했습니다.',
+        url: 'https://www.archdaily.com/490141/centre-pompidou-metz-shigeru-ban-architects'
+      },
+      {
+        id: 'harpa-concert-hall',
+        nameKo: '하르파 콘서트홀',
+        nameEn: 'Harpa Concert Hall',
+        date: '2011-05-04',
+        architect: '헤닝 라르센 & 올라퍼 엘리아슨 (Henning Larsen & Olafur Eliasson)',
+        location: '레이캬비크, 아이슬란드',
+        address: 'Austurbakki 2, 101 Reykjavík, Iceland',
+        postalCode: '101',
+        region: 'global',
+        program: '공연장 · 콘서트홀 · 컨퍼런스 센터',
+        hours: '월: 10:00 – 18:00 / 화: 10:00 – 18:00 / 수: 10:00 – 19:00 / 목: 10:00 – 19:00 / 금: 10:00 – 19:00 / 토: 10:00 – 19:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://www.harpa.is/',
+        note: '아이슬란드 주상절리에서 영감을 받은 12면체 유리 모듈 파사드로 북극권의 빛을 반사하는 콘서트홀로 2011년 5월 4일 개관했습니다.',
+        url: 'https://www.archdaily.com/153520/harpa-concert-hall-and-conference-centre-henning-larsen-architects'
+      },
+      {
+        id: 'mmca-seoul',
+        nameKo: '국립현대미술관 서울',
+        nameEn: 'MMCA Seoul',
+        date: '2013-11-13',
+        architect: '민현준 (MPArt Architects)',
+        location: '서울, 대한민국',
+        address: '서울특별시 종로구 삼청로 30',
+        postalCode: '03062',
+        region: 'korea',
+        program: '미술관',
+        hours: '월: 10:00 – 18:00 / 화: 10:00 – 18:00 / 수: 10:00 – 21:00 / 목: 10:00 – 18:00 / 금: 10:00 – 18:00 / 토: 10:00 – 21:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://www.mmca.go.kr/',
+        note: '경복궁 옆 옛 기무사 터에 마당 개념을 도입해 주변 한옥·근대 건축과 열린 동선으로 어우러진 도심형 미술관으로 2013년 11월 13일 개관했습니다.',
+        url: 'https://www.korea.kr/news/reporterView.do?newsId=148769812'
+      },
+      {
+        id: 'zeitz-mocaa',
+        nameKo: '자이츠 아프리카 현대미술관 (Zeitz MOCAA)',
+        nameEn: 'Zeitz MOCAA',
+        date: '2017-09-22',
+        architect: '헤더윅 스튜디오 (Heatherwick Studio)',
+        location: '케이프타운, 남아프리카공화국',
+        address: 'South Arm Road, Silo District, V&A Waterfront, Cape Town, 8001, South Africa',
+        postalCode: '8001',
+        region: 'global',
+        program: '미술관',
+        hours: '월: 10:00 – 18:00 / 화: 10:00 – 18:00 / 수: 10:00 – 18:00 / 목: 10:00 – 18:00 / 금: 10:00 – 18:00 / 토: 10:00 – 18:00 / 일: 10:00 – 18:00',
+        officialUrl: 'https://zeitzmocaa.museum/',
+        note: '1920년대 곡물 사일로의 42개 콘크리트 원통을 정교하게 조각해 대성당 같은 중앙 아트리움을 만든 리모델링 미술관으로 2017년 9월 22일 개관했습니다.',
+        url: 'https://www.archdaily.com/879763/zeitz-museum-of-contemporary-art-africa-heatherwick-studio'
+      },
+      {
+        id: 'oodi-helsinki',
+        nameKo: '헬싱키 중앙도서관 오디 (Oodi)',
+        nameEn: 'Helsinki Central Library Oodi',
+        date: '2018-12-05',
+        architect: 'ALA 아키텍츠 (ALA Architects)',
+        location: '헬싱키, 핀란드',
+        address: 'Töölönlahdenkatu 4, 00100 Helsinki, Finland',
+        postalCode: '00100',
+        region: 'global',
+        program: '도서관 · 시민문화공간',
+        hours: '월: 08:00 – 21:00 / 화: 08:00 – 21:00 / 수: 08:00 – 21:00 / 목: 08:00 – 21:00 / 금: 08:00 – 21:00 / 토: 10:00 – 20:00 / 일: 10:00 – 20:00',
+        officialUrl: 'https://oodihelsinki.fi/',
+        note: '핀란드산 가문비나무 목재 파사드와 기둥 없는 3층 열람실(북 헤븐)로 미래형 공공 도서관의 모델을 제시하며 2018년 12월 5일 개관했습니다.',
+        url: 'https://ala.fi/work/helsinki-central-library/'
+      },
+      {
+        id: 'depot-boijmans',
+        nameKo: '데포 보이만스 반 뵈닝언',
+        nameEn: 'Depot Boijmans Van Beuningen',
+        date: '2021-11-06',
+        architect: 'MVRDV',
+        location: '로테르담, 네덜란드',
+        address: 'Museumpark 24, 3015 CX Rotterdam, Netherlands',
+        postalCode: '3015 CX',
+        region: 'global',
+        program: '개방형 미술 수장고 · 미술관',
+        hours: '월: 휴관 / 화: 11:00 – 17:00 / 수: 11:00 – 17:00 / 목: 11:00 – 17:00 / 금: 11:00 – 17:00 / 토: 11:00 – 17:00 / 일: 11:00 – 17:00',
+        officialUrl: 'https://www.boijmans.nl/depot',
+        note: '1,664장의 거울 패널로 주변 공원을 반사하는 그릇 형태 외관에 미술품 수장고 전체를 대중에게 공개한 세계 최초의 개방형 수장고로 2021년 11월 6일 개관했습니다.',
+        url: 'https://www.mvrdv.com/news/3923/depot-100-days-until-opening'
+      }
+    ];
+
+    const state = {
+      activeTab: 'matcher',
+      selectedDate: '2014-03-21',
+      regionFilter: 'all',
+      archiveQuery: '',
+      savedIds: [],
+      searchHistory: [],
+      imageCache: {},
+      wikidataCache: {},
+      lastResults: { exact: [], monthDay: [], year: [], wikidata: [], wikidataMd: [], wikidataStatus: 'idle' }
+    };
+
+    function loadSaved() {
+      try {
+        const raw = localStorage.getItem('arch_birthday_saved_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) state.savedIds = parsed;
+        }
+      } catch (e) {
+        state.savedIds = [];
+      }
+    }
+
+    function persistSaved() {
+      try {
+        localStorage.setItem('arch_birthday_saved_v1', JSON.stringify(state.savedIds));
+      } catch (e) {
+        // Ignore storage errors in restricted environments
+      }
+    }
+
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem('arch_birthday_history_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) state.searchHistory = parsed;
+        }
+      } catch (e) {
+        state.searchHistory = [];
+      }
+    }
+
+    function persistHistory() {
+      try {
+        localStorage.setItem('arch_birthday_history_v1', JSON.stringify(state.searchHistory));
+      } catch (e) {
+        // Ignore storage errors in restricted environments
+      }
+    }
+
+    function addToHistory(dateStr) {
+      if (!dateStr) return;
+      state.searchHistory = [dateStr, ...state.searchHistory.filter((d) => d !== dateStr)].slice(0, 8);
+      persistHistory();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const bar = document.getElementById('searchHistoryBar');
+      if (!bar) return;
+      if (!state.searchHistory.length) {
+        bar.innerHTML = `
+          <span class="text-xs font-medium text-[#656056]">검색 기록:</span>
+          <span class="text-xs text-[#8a8376]">아직 검색 기록이 없습니다.</span>
+        `;
+        return;
+      }
+      const pills = state.searchHistory.map((d) => {
+        const active = d === state.selectedDate;
+        const cls = active
+          ? 'bg-[#f3eae5] text-[#9e5438] hover:bg-[#ead9d0]'
+          : 'bg-[#f0ede6] text-[#1c1b18] hover:bg-[#e4dfd5]';
+        return `<button type="button" data-history-date="${d}" class="history-btn text-xs px-2.5 py-1 rounded-full ${cls} font-medium transition cursor-pointer">${d}</button>`;
+      }).join('');
+      bar.innerHTML = `
+        <span class="text-xs font-medium text-[#656056]">검색 기록:</span>
+        ${pills}
+        <button type="button" id="clearHistoryBtn" class="text-xs text-[#8a8376] hover:text-[#1c1b18] underline ml-1 cursor-pointer">전체 삭제</button>
+      `;
+      bar.querySelectorAll('.history-btn').forEach((btn) => {
+        btn.addEventListener('click', () => runSearch(btn.dataset.historyDate));
+      });
+      const clearBtn = document.getElementById('clearHistoryBtn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          state.searchHistory = [];
+          persistHistory();
+          renderHistory();
+        });
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.add('hidden'), 2400);
+    }
+
+    function toggleSave(item) {
+      const idx = state.savedIds.findIndex((s) => s.id === item.id);
+      if (idx >= 0) {
+        state.savedIds.splice(idx, 1);
+        showToast('저장 목록에서 제거했습니다.');
+      } else {
+        state.savedIds.unshift(item);
+        showToast('관심 건축물에 저장했습니다.');
+      }
+      persistSaved();
+      updateBadges();
+      renderCurrentView();
+    }
+
+    function isSaved(id) {
+      return state.savedIds.some((s) => s.id === id);
+    }
+
+    function updateBadges() {
+      document.getElementById('archiveCountBadge').textContent = CURATED_BUILDINGS.length;
+      document.getElementById('savedCountBadge').textContent = state.savedIds.length;
+    }
+
+    function matchLocal(dateStr) {
+      const [y, m, d] = dateStr.split('-');
+      const md = `${m}-${d}`;
+      const exact = [];
+      const monthDay = [];
+      const year = [];
+
+      CURATED_BUILDINGS.forEach((b) => {
+        const [by, bm, bd] = b.date.split('-');
+        if (b.date === dateStr) {
+          exact.push(b);
+        } else if (`${bm}-${bd}` === md) {
+          monthDay.push(b);
+        } else if (by === y) {
+          year.push(b);
+        }
+      });
+
+      return { exact, monthDay, year };
+    }
+
+    async function runSparql(sparql) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      try {
+        const url = `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(sparql)}`;
+        const res = await fetch(url, {
+          method: 'GET',
+          mode: 'cors',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        return data?.results?.bindings || [];
+      } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
+      }
+    }
+
+    function parseBindings(bindings, fallbackDate) {
+      const map = new Map();
+      bindings.forEach((row) => {
+        const uri = row.item?.value || '';
+        const qid = uri.split('/').pop();
+        if (!qid || map.has(qid)) return;
+        const label = row.itemLabel?.value || qid;
+        if (/^Q\d+$/.test(label)) return;
+        const rawDate = row.date?.value ? row.date.value.slice(0, 10) : fallbackDate;
+        map.set(qid, {
+          id: `wd-${qid}`,
+          nameKo: label,
+          nameEn: 'Wikidata Architectural Record',
+          date: rawDate,
+          architect: row.architectLabel?.value || '건축가 정보 미상 (Wikidata)',
+          location: row.countryLabel?.value || '위치 정보 미상',
+          program: row.typeLabel?.value || '건축물',
+          officialUrl: row.website?.value || '',
+          address: row.streetAddress?.value || '',
+          postalCode: row.postalCode?.value || '',
+          region: 'global',
+          note: 'Wikidata 오픈 데이터(P1619 개관일 / P571 완공일)에서 실시간 조회된 건축물입니다.',
+          imageUrl: row.image?.value ? row.image.value.replace('http://', 'https://') + '?width=800' : '',
+          url: row.article?.value || uri,
+          fromWikidata: true
+        });
+      });
+      return Array.from(map.values());
+    }
+
+    async function queryWikidata(dateStr) {
+      if (state.wikidataCache[dateStr]) {
+        return state.wikidataCache[dateStr];
+      }
+      const [yStr, mStr, dStr] = dateStr.split('-');
+      const y = parseInt(yStr, 10);
+      const m = parseInt(mStr, 10);
+      const d = parseInt(dStr, 10);
+      const startIso = `${yStr}-${mStr}-${dStr}T00:00:00Z`;
+      const endIso = `${yStr}-${mStr}-${dStr}T23:59:59Z`;
+
+      const exactSparql = `
+        SELECT DISTINCT ?item ?itemLabel ?architectLabel ?countryLabel ?typeLabel ?date ?article ?website ?streetAddress ?postalCode ?image WHERE {
+          ?item wdt:P84 ?architect .
+          { ?item wdt:P1619 ?date . } UNION { ?item wdt:P571 ?date . }
+          FILTER(?date >= "${startIso}"^^xsd:dateTime && ?date <= "${endIso}"^^xsd:dateTime)
+          OPTIONAL { ?item wdt:P17 ?country . }
+          OPTIONAL { ?item wdt:P31 ?type . }
+          OPTIONAL { ?item wdt:P856 ?website . }
+          OPTIONAL { ?item wdt:P6375 ?streetAddress . }
+          OPTIONAL { ?item wdt:P281 ?postalCode . }
+          OPTIONAL { ?item wdt:P18 ?image . }
+          OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }
+          SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en" . }
+        }
+        LIMIT 20
+      `;
+      const mdSparql = `
+        SELECT DISTINCT ?item ?itemLabel ?architectLabel ?countryLabel ?typeLabel ?date ?article ?image WHERE {
+          ?item wdt:P84 ?architect .
+          ?item wdt:P1619 ?date .
+          FILTER(MONTH(?date) = ${m} && DAY(?date) = ${d} && YEAR(?date) != ${y})
+          OPTIONAL { ?item wdt:P17 ?country . }
+          OPTIONAL { ?item wdt:P31 ?type . }
+          OPTIONAL { ?item wdt:P18 ?image . }
+          OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }
+          SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en" . }
+        }
+        LIMIT 12
+      `;
+
+      const [exactRes, mdRes] = await Promise.allSettled([runSparql(exactSparql), runSparql(mdSparql)]);
+      if (exactRes.status === 'fulfilled' || mdRes.status === 'fulfilled') {
+        const items = exactRes.status === 'fulfilled' ? parseBindings(exactRes.value, dateStr) : [];
+        const mdItems = mdRes.status === 'fulfilled' ? parseBindings(mdRes.value, dateStr) : [];
+        state.wikidataCache[dateStr] = { status: 'ok', items, mdItems };
+        return state.wikidataCache[dateStr];
+      }
+      const errMsg = exactRes.reason?.message || mdRes.reason?.message || '연결 오류';
+      return { status: 'error', items: [], mdItems: [], error: errMsg };
+    }
+
+    const WIKI_TITLE_OVERRIDES = {
+      'centre-pompidou': 'Centre_Pompidou',
+      'louvre-pyramid': 'Louvre_Pyramid',
+      'oslo-opera-house': 'Oslo_Opera_House',
+      'pompidou-metz': 'Centre_Pompidou-Metz',
+      'harpa-concert-hall': 'Harpa_(concert_hall)',
+      'mmca-seoul': 'National_Museum_of_Modern_and_Contemporary_Art',
+      'zeitz-mocaa': 'Zeitz_Museum_of_Contemporary_Art_Africa',
+      'oodi-helsinki': 'Helsinki_Central_Library_Oodi',
+      'depot-boijmans': 'Depot_Boijmans_Van_Beuningen'
+    };
+
+    function getWikiTitle(item) {
+      if (WIKI_TITLE_OVERRIDES[item.id]) return WIKI_TITLE_OVERRIDES[item.id];
+      if (item.url && item.url.includes('en.wikipedia.org/wiki/')) {
+        return decodeURIComponent(item.url.split('en.wikipedia.org/wiki/')[1].split('#')[0]);
+      }
+      if (item.nameEn && item.nameEn !== 'Wikidata Architectural Record') {
+        return item.nameEn;
+      }
+      return '';
+    }
+
+    async function resolveImageUrl(item) {
+      if (!item) return '';
+      if (item.imageUrl) return item.imageUrl;
+      if (Object.prototype.hasOwnProperty.call(state.imageCache, item.id)) {
+        return state.imageCache[item.id];
+      }
+      const title = getWikiTitle(item);
+      if (!title) {
+        state.imageCache[item.id] = '';
+        return '';
+      }
+      try {
+        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const src = data?.thumbnail?.source || data?.originalimage?.source || '';
+        state.imageCache[item.id] = src;
+        return src;
+      } catch (e) {
+        state.imageCache[item.id] = '';
+        return '';
+      }
+    }
+
+    function hydrateImages(root) {
+      if (!root) return;
+      root.querySelectorAll('img[data-img-id]').forEach(async (img) => {
+        if (img.dataset.hydrated) return;
+        img.dataset.hydrated = '1';
+        const item = findItemById(img.dataset.imgId);
+        if (!item) return;
+        const src = await resolveImageUrl(item);
+        if (src) {
+          img.src = src;
+        }
+      });
+    }
+
+    function formatHoursHTML(hours) {
+      if (!hours) return '';
+      const lines = hours.split(' / ').map((line) => `<p>${line.trim()}</p>`).join('');
+      return `
+        <div class="flex items-start gap-1.5">
+          <span class="text-[#656056] font-medium shrink-0">운영 시간:</span>
+          <div class="space-y-0.5">${lines}</div>
+        </div>
+      `;
+    }
+
+    function createCardHTML(item, badgeLabel = '') {
+      const saved = isSaved(item.id);
+      const badgeHTML = badgeLabel
+        ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#f3eae5] text-[#9e5438]">${badgeLabel}</span>`
+        : '';
+      const sourceTag = item.fromWikidata
+        ? `<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#eef2f6] text-[#3a5570]">Wikidata</span>`
+        : `<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#f0ede6] text-[#656056]">아카이브</span>`;
+
+      const cachedImg = item.imageUrl || state.imageCache[item.id] || '';
+      return `
+        <article class="hairline-border bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between gap-4">
+          <div>
+            <div class="relative w-full h-44 rounded-xl overflow-hidden bg-[#f0ede6] mb-3.5 hairline-border">
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-[#8a8376] px-4 text-center">
+                <svg class="w-7 h-7 opacity-40 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                </svg>
+                <span class="text-[11px] font-medium opacity-75 line-clamp-1">${item.nameEn || item.nameKo}</span>
+              </div>
+              <img
+                data-img-id="${item.id}"
+                alt="${item.nameKo}"
+                loading="lazy"
+                ${cachedImg ? `src="${cachedImg}"` : ''}
+                onload="this.classList.remove('opacity-0'); this.classList.add('opacity-100');"
+                onerror="this.style.display='none';"
+                class="relative z-10 w-full h-full object-cover transition-opacity duration-300 ${cachedImg ? 'opacity-100' : 'opacity-0'}"
+              />
+            </div>
+            <div class="flex items-start justify-between gap-2 mb-2.5">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs font-mono font-semibold text-[#9e5438]">${item.date}</span>
+                ${badgeHTML}
+                ${sourceTag}
+              </div>
+              <button
+                type="button"
+                data-save-id="${item.id}"
+                class="save-toggle-btn text-xs px-2.5 py-1 rounded-lg hairline-border ${saved ? 'bg-[#1c1b18] text-white' : 'bg-[#faf9f6] text-[#656056] hover:bg-[#efece4]'} font-medium transition cursor-pointer shrink-0"
+              >
+                ${saved ? '★ 저장됨' : '☆ 저장'}
+              </button>
+            </div>
+            <h3 class="text-lg font-bold text-[#1c1b18] leading-snug">${item.nameKo}</h3>
+            <p class="text-xs text-[#656056] mt-0.5">${item.nameEn}</p>
+            <div class="mt-3 pt-3 border-t border-[#f0ede6] space-y-1 text-sm">
+              <p><span class="text-[#656056] font-medium">건축가:</span> <span class="font-semibold text-[#1c1b18]">${item.architect}</span></p>
+              <div class="flex items-start gap-1.5">
+                <span class="text-[#656056] font-medium shrink-0">위치:</span>
+                <div class="space-y-0.5">
+                  <p>${item.location}</p>
+                  ${item.address ? `<p class="text-xs text-[#656056]">${item.address}${item.postalCode && !item.postalCode.startsWith('없음') && !item.address.includes(item.postalCode) ? ` (${item.postalCode})` : ''}</p>` : (item.postalCode && !item.postalCode.startsWith('없음') ? `<p class="text-xs text-[#656056]">${item.postalCode}</p>` : '')}
+                </div>
+              </div>
+              <p><span class="text-[#656056] font-medium">프로그램:</span> ${item.program || '건축물'}</p>
+              ${formatHoursHTML(item.hours)}
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              data-detail-id="${item.id}"
+              class="detail-open-btn text-xs font-semibold text-[#1c1b18] hover:text-[#9e5438] underline underline-offset-4 cursor-pointer"
+            >
+              상세 정보 보기
+            </button>
+            <div class="flex items-center gap-3">
+              ${item.officialUrl ? `<a href="${item.officialUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-[#9e5438] hover:underline">공식 웹사이트 ↗</a>` : ''}
+              <a
+                href="${item.url}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-xs font-medium text-[#656056] hover:text-[#1c1b18]"
+              >
+                출처 ↗
+              </a>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderGroup(title, subtitle, items, badgeLabel) {
+      if (!items.length) return '';
+      return `
+        <div class="space-y-3">
+          <div class="flex items-baseline justify-between gap-2">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-[#1c1b18]">${title}</h2>
+              <p class="text-xs text-[#656056]">${subtitle}</p>
+            </div>
+            <span class="text-xs font-semibold text-[#9e5438]">${items.length}건</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${items.map((item) => createCardHTML(item, badgeLabel)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMatcherResults() {
+      const container = document.getElementById('resultsSection');
+      const { exact, monthDay, year, wikidata, wikidataMd = [], wikidataStatus } = state.lastResults;
+      const [y, m, d] = state.selectedDate.split('-');
+
+      // Merge exact local + exact wikidata (dedup by lowercase name)
+      const exactCombined = [...exact];
+      const seenNames = new Set(exact.map((x) => x.nameKo.toLowerCase()));
+      wikidata.forEach((w) => {
+        if (!seenNames.has(w.nameKo.toLowerCase())) {
+          exactCombined.push(w);
+        }
+      });
+
+      let html = '';
+
+      if (exactCombined.length > 0) {
+        html += renderGroup(
+          `완벽 일치 (${state.selectedDate})`,
+          '입력한 생년월일과 연·월·일이 모두 일치하는 건축물입니다.',
+          exactCombined,
+          '완벽 일치'
+        );
+      } else {
+        html += `
+          <div class="hairline-border bg-white rounded-2xl p-6 text-center space-y-2">
+            <p class="text-sm font-semibold text-[#1c1b18]">
+              ${state.selectedDate}에 정확히 일치하는 건축물을 찾지 못했습니다.
+            </p>
+            <p class="text-xs text-[#656056]">
+              ${wikidataStatus === 'loading' ? 'Wikidata에서 전 세계 건축물 데이터를 실시간 조회하고 있습니다...' : '아래에서 같은 생일(월·일) 또는 같은 해에 완공된 건축물을 확인해 보세요.'}
+            </p>
+          </div>
+        `;
+      }
+
+      const mdCombined = [...monthDay];
+      const seenMd = new Set(monthDay.map((x) => x.nameKo.toLowerCase()));
+      wikidataMd.forEach((w) => {
+        if (!seenMd.has(w.nameKo.toLowerCase())) mdCombined.push(w);
+      });
+
+      if (mdCombined.length > 0) {
+        html += renderGroup(
+          `같은 생일 (${parseInt(m, 10)}월 ${parseInt(d, 10)}일)`,
+          '연도는 다르지만 같은 월·일에 완공 또는 개관한 건축물입니다.',
+          mdCombined,
+          '월·일 일치'
+        );
+      }
+
+      if (year.length > 0) {
+        html += renderGroup(
+          `같은 해 탄생 (${y}년)`,
+          '같은 해에 완공되어 시대를 함께 시작한 건축물입니다.',
+          year,
+          `${y}년 완공`
+        );
+      }
+
+      if (!exactCombined.length && !mdCombined.length && !year.length && wikidataStatus !== 'loading') {
+        html += `
+          <div class="hairline-border bg-[#faf9f6] rounded-2xl p-5 text-center">
+            <p class="text-xs text-[#656056]">
+              상단의 <strong>검색 기록</strong>이나 <strong>랜덤</strong> 버튼을 눌러 다른 날짜의 건축물도 탐색해 보세요.
+            </p>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      attachCardListeners(container);
+    }
+
+    function renderArchive() {
+      const grid = document.getElementById('archiveGrid');
+      const q = state.archiveQuery.trim().toLowerCase();
+      const filtered = CURATED_BUILDINGS.filter((b) => {
+        const matchRegion = state.regionFilter === 'all' || b.region === state.regionFilter;
+        const matchQuery =
+          !q ||
+          b.nameKo.toLowerCase().includes(q) ||
+          b.nameEn.toLowerCase().includes(q) ||
+          b.architect.toLowerCase().includes(q) ||
+          b.location.toLowerCase().includes(q) ||
+          (b.program && b.program.toLowerCase().includes(q)) ||
+          (b.address && b.address.toLowerCase().includes(q)) ||
+          (b.postalCode && b.postalCode.toLowerCase().includes(q)) ||
+          b.date.includes(q);
+        return matchRegion && matchQuery;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="md:col-span-2 hairline-border bg-white rounded-2xl p-8 text-center text-sm text-[#656056]">검색 조건에 맞는 건축물이 없습니다.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map((b) => createCardHTML(b)).join('');
+      attachCardListeners(grid);
+    }
+
+    function renderSaved() {
+      const grid = document.getElementById('savedGrid');
+      if (!state.savedIds.length) {
+        grid.innerHTML = `<div class="md:col-span-2 hairline-border bg-white rounded-2xl p-8 text-center text-sm text-[#656056]">저장한 건축물이 아직 없습니다. 카드 우측의 '☆ 저장' 버튼을 눌러 추가해 보세요.</div>`;
+        return;
+      }
+      grid.innerHTML = state.savedIds.map((b) => createCardHTML(b)).join('');
+      attachCardListeners(grid);
+    }
+
+    function findItemById(id) {
+      return (
+        CURATED_BUILDINGS.find((b) => b.id === id) ||
+        state.lastResults.wikidata.find((b) => b.id === id) ||
+        (state.lastResults.wikidataMd || []).find((b) => b.id === id) ||
+        state.savedIds.find((b) => b.id === id)
+      );
+    }
+
+    function openDetailModal(item) {
+      if (!item) return;
+      const modal = document.getElementById('detailModal');
+      const body = document.getElementById('modalBody');
+      const modalImg = item.imageUrl || state.imageCache[item.id] || '';
+      body.innerHTML = `
+        <div class="relative w-full h-52 rounded-xl overflow-hidden bg-[#f0ede6] mb-4 hairline-border">
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-[#8a8376] px-4 text-center">
+            <svg class="w-8 h-8 opacity-40 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+            </svg>
+            <span class="text-xs font-medium opacity-75">${item.nameEn || item.nameKo}</span>
+          </div>
+          <img
+            data-img-id="${item.id}"
+            alt="${item.nameKo}"
+            ${modalImg ? `src="${modalImg}"` : ''}
+            onload="this.classList.remove('opacity-0'); this.classList.add('opacity-100');"
+            onerror="this.style.display='none';"
+            class="relative z-10 w-full h-full object-cover transition-opacity duration-300 ${modalImg ? 'opacity-100' : 'opacity-0'}"
+          />
+        </div>
+        <p class="text-xs font-mono font-semibold text-[#9e5438]">${item.date}</p>
+        <h3 id="modalTitle" class="text-xl font-bold text-[#1c1b18] mt-1">${item.nameKo}</h3>
+        <p class="text-xs text-[#656056]">${item.nameEn}</p>
+        <div class="mt-4 space-y-2 text-sm border-y border-[#f0ede6] py-3">
+          <p><span class="text-[#656056] font-medium">건축가:</span> <span class="font-semibold">${item.architect}</span></p>
+          <div class="flex items-start gap-1.5">
+                <span class="text-[#656056] font-medium shrink-0">위치:</span>
+                <div class="space-y-0.5">
+                  <p>${item.location}</p>
+                  ${item.address ? `<p class="text-xs text-[#656056]">${item.address}${item.postalCode && !item.postalCode.startsWith('없음') && !item.address.includes(item.postalCode) ? ` (${item.postalCode})` : ''}</p>` : (item.postalCode && !item.postalCode.startsWith('없음') ? `<p class="text-xs text-[#656056]">${item.postalCode}</p>` : '')}
+                </div>
+              </div>
+          <p><span class="text-[#656056] font-medium">프로그램:</span> ${item.program || '건축물'}</p>
+        </div>
+        <p class="text-sm text-[#1c1b18] leading-relaxed mt-4">${item.note}</p>
+        <div class="mt-5 flex flex-wrap justify-end gap-2">
+          ${item.officialUrl ? `<a href="${item.officialUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-[#9e5438] text-white text-xs font-semibold hover:bg-[#86452d] transition">공식 웹사이트 ↗</a>` : ''}
+          <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-[#1c1b18] text-white text-xs font-semibold hover:bg-[#33312b] transition">
+            원문 정보 보기 ↗
+          </a>
+        </div>
+      `;
+      hydrateImages(body);
+      modal.classList.remove('hidden');
+    }
+
+    function attachCardListeners(root) {
+      hydrateImages(root);
+      root.querySelectorAll('.save-toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const item = findItemById(btn.dataset.saveId);
+          if (item) toggleSave(item);
+        });
+      });
+      root.querySelectorAll('.detail-open-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const item = findItemById(btn.dataset.detailId);
+          if (item) openDetailModal(item);
+        });
+      });
+    }
+
+    function renderCurrentView() {
+      if (state.activeTab === 'matcher') renderMatcherResults();
+      else if (state.activeTab === 'archive') renderArchive();
+      else if (state.activeTab === 'saved') renderSaved();
+    }
+
+    async function runSearch(dateStr) {
+      if (!dateStr) return;
+      state.selectedDate = dateStr;
+      document.getElementById('birthDateInput').value = dateStr;
+      addToHistory(dateStr);
+
+      const local = matchLocal(dateStr);
+      const useWd = true;
+
+      state.lastResults = {
+        ...local,
+        wikidata: [],
+        wikidataMd: [],
+        wikidataStatus: useWd ? 'loading' : 'off'
+      };
+
+      const banner = document.getElementById('statusBanner');
+      const statusText = document.getElementById('statusText');
+      const statusBadge = document.getElementById('statusBadge');
+
+      if (useWd) {
+        banner.classList.remove('hidden');
+        statusText.textContent = `${dateStr} 기준 Wikidata 전 세계 건축물 데이터를 조회하는 중...`;
+        statusBadge.textContent = '조회 중';
+        renderMatcherResults();
+
+        const wdRes = await queryWikidata(dateStr);
+        state.lastResults.wikidata = wdRes.items || [];
+        state.lastResults.wikidataMd = wdRes.mdItems || [];
+        state.lastResults.wikidataStatus = wdRes.status;
+
+        if (wdRes.status === 'ok') {
+          const totalWd = (wdRes.items?.length || 0) + (wdRes.mdItems?.length || 0);
+          statusText.textContent = `내장 아카이브와 Wikidata 조회를 완료했습니다. (Wikidata ${totalWd}건)`;
+          statusBadge.textContent = '실시간 연동';
+        } else {
+          statusText.textContent = 'Wikidata 실시간 조회에 연결하지 못해 내장 아카이브 결과만 표시합니다.';
+          statusBadge.textContent = '오프라인 폴백';
+        }
+      } else {
+        banner.classList.add('hidden');
+      }
+
+      renderMatcherResults();
+    }
+
+    // Event bindings
+    document.querySelectorAll('.nav-tab').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        state.activeTab = target;
+        document.querySelectorAll('.nav-tab').forEach((b) => {
+          b.classList.toggle('tab-active', b.dataset.tab === target);
+          b.classList.toggle('bg-[#f0ede6]', b.dataset.tab !== target);
+          b.classList.toggle('text-[#1c1b18]', b.dataset.tab !== target);
+        });
+        document.getElementById('view-matcher').classList.toggle('hidden', target !== 'matcher');
+        document.getElementById('view-archive').classList.toggle('hidden', target !== 'archive');
+        document.getElementById('view-saved').classList.toggle('hidden', target !== 'saved');
+        renderCurrentView();
+      });
+    });
+
+    document.getElementById('birthForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = document.getElementById('birthDateInput').value;
+      if (val) runSearch(val);
+    });
+
+    document.getElementById('randomDateBtn').addEventListener('click', () => {
+      const pick = CURATED_BUILDINGS[Math.floor(Math.random() * CURATED_BUILDINGS.length)];
+      runSearch(pick.date);
+    });
+
+    document.getElementById('archiveSearchInput').addEventListener('input', (e) => {
+      state.archiveQuery = e.target.value;
+      renderArchive();
+    });
+
+    document.querySelectorAll('.region-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.regionFilter = btn.dataset.region;
+        document.querySelectorAll('.region-btn').forEach((b) => {
+          b.classList.toggle('tab-active', b.dataset.region === state.regionFilter);
+          b.classList.toggle('bg-[#f0ede6]', b.dataset.region !== state.regionFilter);
+          b.classList.toggle('text-[#1c1b18]', b.dataset.region !== state.regionFilter);
+        });
+        renderArchive();
+      });
+    });
+
+    document.getElementById('clearSavedBtn').addEventListener('click', () => {
+      state.savedIds = [];
+      persistSaved();
+      updateBadges();
+      renderSaved();
+      showToast('저장 목록을 비웠습니다.');
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('detailModal').classList.add('hidden');
+    });
+
+    document.getElementById('detailModal').addEventListener('click', (e) => {
+      if (e.target.id === 'detailModal') {
+        document.getElementById('detailModal').classList.add('hidden');
+      }
+    });
+
+    // Init
+    loadSaved();
+    loadHistory();
+    updateBadges();
+    runSearch(state.selectedDate);
+  </script>
+</body>
+</html>
