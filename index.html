@@ -1,9 +1,17 @@
 <!DOCTYPE html>
+<!-- ArchBirthday Archive | Created by Spacecap-MS (https://github.com/Spacecap-MS) -->
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>건축 생년월일 아카이브 | ArchBirthday</title>
+  <title>건축 생년월일 아카이브 | ArchBirthday by Spacecap-MS</title>
+  <meta name="author" content="Spacecap-MS" />
+  <meta name="description" content="생년월일을 입력하면 같은 날 완공·개관한 현존 건축물과 건축가를 찾아주는 웹 아카이브 · Created by Spacecap-MS" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ArchBirthday by Spacecap-MS" />
+  <meta property="og:title" content="건축 생년월일 아카이브 | ArchBirthday by Spacecap-MS" />
+  <meta property="og:description" content="생년월일을 입력하면 같은 날 완공·개관한 현존 건축물과 건축가를 찾아주는 웹 아카이브 · Created by Spacecap-MS" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%239e5438'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' fill='%23f7f5f0' font-family='Inter,sans-serif' font-weight='700' font-size='28'%3EA%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -48,21 +56,47 @@
         <div class="flex items-stretch gap-4">
           <div class="w-0.5 bg-[#9e5438] rounded-full shrink-0"></div>
           <div>
-            <p class="text-xs font-semibold tracking-widest uppercase text-[#9e5438]">ArchBirthday Archive</p>
+            <p class="text-xs font-semibold tracking-widest uppercase text-[#9e5438]">
+              ArchBirthday Archive · by <a href="https://github.com/Spacecap-MS" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:text-[#1c1b18]">Spacecap-MS</a>
+            </p>
             <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-[#1c1b18] mt-0.5">
               건축 생년월일 아카이브
             </h1>
             <p class="text-sm text-[#656056] mt-1">
               생년월일을 입력하면 같은 날 완공·개관한 현존 건축물과 건축가를 찾아줍니다.
             </p>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <a
+                href="https://hits.sh/spacecap-ms.github.io/Archbirthday/"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="실시간 누적 방문자 통계 보기"
+                class="inline-flex items-center"
+              >
+                <img
+                  src="https://hits.sh/spacecap-ms.github.io/Archbirthday.svg?style=flat-square&label=VISITORS&color=9e5438&labelColor=1c1b18"
+                  alt="실시간 누적 방문자 수"
+                  onerror="this.parentElement.style.display='none';"
+                  class="h-5 rounded"
+                />
+              </a>
+              <span
+                id="liveUsersBadge"
+                class="hidden inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-[#f3eae5] text-[#9e5438] text-[11px] font-semibold hairline-border"
+                title="실시간 동시 접속자 수"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-[#9e5438] animate-pulse"></span>
+                <span id="liveUsersText">현재 1명 접속 중</span>
+              </span>
+            </div>
           </div>
         </div>
         <nav class="flex flex-wrap gap-2" aria-label="메인 탭">
           <button type="button" data-tab="matcher" class="nav-tab tab-active px-3.5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
-            생년월일 매칭
+            Birthdate Match
           </button>
           <button type="button" data-tab="archive" class="nav-tab bg-[#f0ede6] text-[#1c1b18] hover:bg-[#e5e0d5] px-3.5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
-            전체 아카이브 <span id="archiveCountBadge" class="ml-1 text-xs opacity-75">18</span>
+            전체 아카이브
           </button>
           <button type="button" data-tab="saved" class="nav-tab bg-[#f0ede6] text-[#1c1b18] hover:bg-[#e5e0d5] px-3.5 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
             저장한 목록 <span id="savedCountBadge" class="ml-1 text-xs opacity-75">0</span>
@@ -73,46 +107,114 @@
 
     <!-- Tab 1: Matcher -->
     <main id="view-matcher" class="space-y-6">
-      <!-- Search Panel -->
-      <section class="hairline-border bg-white rounded-2xl p-5 sm:p-6 shadow-sm">
-        <form id="birthForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-            <div class="md:col-span-9">
-              <label for="birthDateInput" class="block text-xs font-semibold text-[#656056] uppercase tracking-wider mb-1.5">
-                생년월일 (YYYY-MM-DD)
-              </label>
-              <input
-                id="birthDateInput"
-                type="date"
-                value="2014-03-21"
-                min="1800-01-01"
-                max="2026-12-31"
-                required
-                class="w-full h-11 px-3.5 rounded-xl hairline-border bg-[#faf9f6] text-[#1c1b18] font-medium focus:outline-none focus:ring-2 focus:ring-[#9e5438]"
-              />
+      <!-- Main Hero: Birthdate Input + Site Guestbook -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- Left: Search Panel -->
+        <section class="lg:col-span-7 hairline-border bg-white rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+          <form id="birthForm" class="space-y-4">
+            <div>
+              <p class="text-xs font-bold tracking-widest uppercase text-[#9e5438]">Birthdate Match</p>
+              <h2 class="text-lg font-bold text-[#1c1b18] mt-0.5">내 생일과 같은 날 완공된 건축물 찾기</h2>
             </div>
-            <div class="md:col-span-3 flex gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+              <div class="sm:col-span-7">
+                <label for="birthDateInput" class="block text-xs font-semibold text-[#656056] uppercase tracking-wider mb-1.5">
+                  생년월일 (YYYY-MM-DD)
+                </label>
+                <input
+                  id="birthDateInput"
+                  type="date"
+                  value="2014-03-21"
+                  min="1800-01-01"
+                  max="2026-12-31"
+                  required
+                  class="w-full h-11 px-3.5 rounded-xl hairline-border bg-[#faf9f6] text-[#1c1b18] font-medium focus:outline-none focus:ring-2 focus:ring-[#9e5438]"
+                />
+              </div>
+              <div class="sm:col-span-5 flex gap-2">
+                <button
+                  type="submit"
+                  id="searchBtn"
+                  class="flex-1 h-11 px-4 rounded-xl bg-[#1c1b18] hover:bg-[#33312b] text-white text-sm font-semibold transition cursor-pointer whitespace-nowrap"
+                >
+                  건축물 찾기
+                </button>
+                <button
+                  type="button"
+                  id="randomDateBtn"
+                  title="무작위 날짜 선택"
+                  class="h-11 px-3.5 rounded-xl hairline-border bg-[#faf9f6] hover:bg-[#efece4] text-sm font-medium text-[#1c1b18] transition cursor-pointer shrink-0"
+                >
+                  랜덤
+                </button>
+              </div>
+            </div>
+
+            <div id="searchHistoryBar" class="flex flex-wrap items-center gap-2 pt-1"></div>
+          </form>
+
+          <form id="nameSearchForm" class="mt-4 pt-4 border-t border-[#f0ede6] space-y-2">
+            <label for="buildingNameInput" class="block text-xs font-semibold text-[#656056] uppercase tracking-wider">
+              건물 · 건축가 이름으로 찾기
+            </label>
+            <div class="flex gap-2">
+              <input
+                id="buildingNameInput"
+                type="text"
+                placeholder="건물명 또는 건축가 입력 (예: 에펠탑, 안도 타다오, 자하 하디드)"
+                class="flex-1 h-10 px-3.5 rounded-xl hairline-border bg-[#faf9f6] text-sm text-[#1c1b18] focus:outline-none focus:ring-2 focus:ring-[#9e5438]"
+              />
               <button
                 type="submit"
-                id="searchBtn"
-                class="flex-1 h-11 px-4 rounded-xl bg-[#1c1b18] hover:bg-[#33312b] text-white text-sm font-semibold transition cursor-pointer"
+                class="h-10 px-4 rounded-xl bg-[#9e5438] hover:bg-[#86452d] text-white text-sm font-semibold transition cursor-pointer shrink-0"
               >
-                건축물 찾기
-              </button>
-              <button
-                type="button"
-                id="randomDateBtn"
-                title="무작위 날짜 선택"
-                class="h-11 px-3.5 rounded-xl hairline-border bg-[#faf9f6] hover:bg-[#efece4] text-sm font-medium text-[#1c1b18] transition cursor-pointer"
-              >
-                랜덤
+                이름 검색
               </button>
             </div>
+          </form>
+        </section>
+
+        <!-- Right: Main Site Guestbook -->
+        <aside class="lg:col-span-5 hairline-border bg-white rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col gap-3">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <p class="text-xs font-bold tracking-widest uppercase text-[#9e5438]">Guestbook</p>
+              <h2 class="text-lg font-bold text-[#1c1b18] mt-0.5">
+                방명록 <span id="mainGbCount" class="text-sm font-semibold text-[#9e5438] ml-1">0</span>
+              </h2>
+            </div>
+            <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f0ede6] text-[#656056]">실시간 공용</span>
           </div>
 
-          <div id="searchHistoryBar" class="flex flex-wrap items-center gap-2 pt-1"></div>
-        </form>
-      </section>
+          <form id="mainGuestbookForm" class="space-y-2">
+            <div class="flex gap-2">
+              <input
+                id="mainGbAuthor"
+                type="text"
+                maxlength="24"
+                placeholder="닉네임 (예: 건축학도)"
+                class="w-32 sm:w-36 px-3 py-1.5 rounded-lg hairline-border bg-[#faf9f6] text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+              />
+              <button
+                type="submit"
+                class="ml-auto px-3.5 py-1.5 rounded-lg bg-[#9e5438] hover:bg-[#86452d] text-white text-xs font-semibold transition cursor-pointer shrink-0"
+              >
+                남기기
+              </button>
+            </div>
+            <textarea
+              id="mainGbText"
+              rows="2"
+              maxlength="240"
+              required
+              placeholder="방문 인사나 내 생일에 찾은 건축물 이야기를 남겨보세요."
+              class="w-full px-3 py-2 rounded-lg hairline-border bg-[#faf9f6] text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30 resize-none"
+            ></textarea>
+          </form>
+
+          <div id="mainGuestbookList" class="space-y-2 max-h-44 overflow-y-auto pr-1"></div>
+        </aside>
+      </div>
 
       <!-- Status Banner -->
       <div id="statusBanner" class="hidden rounded-xl px-4 py-3 text-sm hairline-border bg-white/90 flex items-center justify-between gap-3">
@@ -163,13 +265,13 @@
       <p>
         내장 아카이브(ArchDaily·공식 자료 기반 검증 건축물 37선)와 <a href="https://query.wikidata.org/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#1c1b18]">Wikidata SPARQL</a> 공개 데이터를 함께 조회합니다.
       </p>
-      <p>완공일 및 개관일(YYYY-MM-DD) 기준 매칭</p>
+      <p>© 2026 <a href="https://github.com/Spacecap-MS" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#1c1b18] hover:text-[#9e5438] underline underline-offset-2">Spacecap-MS</a> · 완공일 및 개관일(YYYY-MM-DD) 기준 매칭</p>
     </footer>
   </div>
 
   <!-- Detail Modal -->
   <div id="detailModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="bg-white hairline-border rounded-2xl max-w-lg w-full p-6 shadow-xl relative">
+    <div class="bg-white hairline-border rounded-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto p-6 shadow-xl relative">
       <button type="button" id="closeModalBtn" aria-label="닫기" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0ede6] hover:bg-[#e2ddd3] flex items-center justify-center text-sm font-bold cursor-pointer">
         ✕
       </button>
@@ -275,6 +377,7 @@
         program: '미술관',
         hours: '월: 휴관 / 화: 10:00 – 19:00 / 수: 10:00 – 19:00 / 목: 10:00 – 19:00 / 금: 10:00 – 19:00 / 토: 10:00 – 19:00 / 일: 10:00 – 19:00',
         note: '티타늄 패널의 유선형 볼륨으로 도시 재생의 상징(빌바오 효과)이 된 해체주의 건축물입니다.',
+        officialUrl: 'https://www.guggenheim-bilbao.eus/',
         url: 'https://en.wikipedia.org/wiki/Guggenheim_Museum_Bilbao'
       },
       {
@@ -306,6 +409,7 @@
         program: '공항 터미널',
         hours: '월: 00:00 – 24:00 (연중무휴) / 화: 00:00 – 24:00 (연중무휴) / 수: 00:00 – 24:00 (연중무휴) / 목: 00:00 – 24:00 (연중무휴) / 금: 00:00 – 24:00 (연중무휴) / 토: 00:00 – 24:00 (연중무휴) / 일: 00:00 – 24:00 (연중무휴)',
         note: '한국 전통 처마의 곡선미를 지붕 구조에 반영한 관문 공항으로, 2001년 3월 29일 개항했습니다.',
+        officialUrl: 'https://www.airport.kr/ap_ko/index.do',
         url: 'https://en.wikipedia.org/wiki/Incheon_International_Airport'
       },
       {
@@ -385,6 +489,7 @@
         program: '초고층 복합 (주거 · 호텔 · 오피스 · 전망대)',
         hours: '월: 00:00 – 24:00 (전망대 별도 운영) / 화: 00:00 – 24:00 (전망대 별도 운영) / 수: 00:00 – 24:00 (전망대 별도 운영) / 목: 00:00 – 24:00 (전망대 별도 운영) / 금: 00:00 – 24:00 (전망대 별도 운영) / 토: 00:00 – 24:00 (전망대 별도 운영) / 일: 00:00 – 24:00 (전망대 별도 운영)',
         note: '828m 높이의 세계 최고층 건축물로, 사막의 히메노칼리스(Hymenocallis) 꽃에서 착안한 Y자형 평면 구조를 채택했습니다.',
+        officialUrl: 'https://www.burjkhalifa.ae/',
         url: 'https://en.wikipedia.org/wiki/Burj_Khalifa'
       },
       {
@@ -416,6 +521,7 @@
         program: '복합문화센터 · 미술관 · 공연장',
         hours: '월: 휴관 / 화: 10:30 – 18:00 / 수: 10:30 – 18:00 / 목: 10:30 – 18:00 / 금: 10:30 – 18:00 / 토: 10:30 – 17:00 / 일: 10:30 – 17:00',
         note: '기둥과 벽의 경계를 지우고 대지에서 솟아오르는 연속 곡면으로 설계된 문화센터입니다.',
+        officialUrl: 'https://heydaraliyevcenter.az/',
         url: 'https://en.wikipedia.org/wiki/Heydar_Aliyev_Center'
       },
       {
@@ -495,6 +601,7 @@
         program: '오피스',
         hours: '오피스 빌딩 (내부 일반 관람 제한)',
         note: '아르 데코 양식의 정수를 보여주는 마천루로, 1930년 5월 27일 완공 당시 세계 최고층 빌딩에 올랐습니다.',
+        officialUrl: 'https://chryslerbuilding.com/',
         url: 'https://en.wikipedia.org/wiki/Chrysler_Building'
       },
       {
@@ -590,6 +697,7 @@
         program: '미술관',
         hours: '월: 10:00 – 18:30 / 화: 10:00 – 18:30 / 수: 10:00 – 18:30 / 목: 10:00 – 18:30 / 금: 10:00 – 20:30 / 토: 10:00 – 20:30 / 일: 10:00 – 20:30',
         note: '기하학적 패턴의 거대한 돔 사이로 빛의 비(Rain of Light)가 쏟아지는 해양 미술관으로 2017년 11월 11일 개관했습니다.',
+        officialUrl: 'https://www.louvreabudhabi.ae/',
         url: 'https://en.wikipedia.org/wiki/Louvre_Abu_Dhabi'
       },
       {
@@ -777,10 +885,856 @@
       archiveQuery: '',
       savedIds: [],
       searchHistory: [],
+      guestbook: {},
+      userAnalyses: {},
+      architectAnalyses: {},
+      birthdayTwins: {},
+      firebaseConnected: false,
+      fbApi: null,
+      openModalItem: null,
+      openModalTab: 'analysis',
       imageCache: {},
       wikidataCache: {},
       lastResults: { exact: [], monthDay: [], year: [], wikidata: [], wikidataMd: [], wikidataStatus: 'idle' }
     };
+
+    const ARCHITECT_PROFILES = [
+      {
+        match: ['gustave eiffel', '귀스타브 에펠'],
+        name: '귀스타브 에펠 (Gustave Eiffel)',
+        years: '1832 – 1923 · 프랑스',
+        keywords: ['철골 트러스', '풍하중 계산', '산업혁명 구조미'],
+        philosophy: '장식을 위한 석조가 아니라 바람의 저항을 수학적으로 분산시키는 순수한 철골 구조 그 자체가 아름다움이 될 수 있음을 증명한 19세기 구조 공학의 선구자입니다.',
+        works: '에펠탑(1889), 가라비 고가교(1884), 자유의 여신상 내부 철골 구조'
+      },
+      {
+        match: ['shreve, lamb', '슈리브'],
+        name: '슈리브, 램 & 하몬 (Shreve, Lamb & Harmon)',
+        years: '1920 – 1940s · 미국',
+        keywords: ['아르 데코', '셋백(Setback)', '표준화 시공'],
+        philosophy: '뉴욕 조닝 법규에 따른 계단식 셋백(Setback) 매스와 모듈화된 철골·외장 디테일을 결합해 초고층 오피스 빌딩의 경제성과 도시적 상징성을 동시에 달성했습니다.',
+        works: '엠파이어 스테이트 빌딩(1931), 500 피프스 애비뉴'
+      },
+      {
+        match: ['utzon', '웃존'],
+        name: '이외른 웃존 (Jørn Utzon)',
+        years: '1918 – 2008 · 덴마크 · 2003 프리츠커상',
+        keywords: ['유기적 기하학', '프리캐스트 쉘', '기단(Platform)'],
+        philosophy: '자연의 구름·조개·나뭇잎과 고대 유적의 거대한 기단(Platform)에서 영감을 받아, 산업화된 프리캐스트 부재로 시적이고 유기적인 대공간을 구현했습니다.',
+        works: '시드니 오페라 하우스(1973), 바그스베르드 교회(1976), 쿠웨이트 국회의사당'
+      },
+      {
+        match: ['renzo piano', '렌조 피아노'],
+        name: '렌조 피아노 (Renzo Piano)',
+        years: '1937 – · 이탈리아 · 1998 프리츠커상',
+        keywords: ['하이테크', '구조의 경량화', '빛의 필터링'],
+        philosophy: '건축을 기술과 공예의 결합으로 보며, 무거운 덩어리를 해체하고 구조 부재와 자연광의 섬세한 조절을 통해 가볍고 투명한 공공 공간을 만듭니다.',
+        works: '퐁피두 센터(1977), 더 샤드(2013), 메닐 컬렉션, 간사이 국제공항'
+      },
+      {
+        match: ['richard rogers', '리처드 로저스'],
+        name: '리처드 로저스 (Richard Rogers)',
+        years: '1933 – 2021 · 영국 · 2007 프리츠커상',
+        keywords: ['하이테크', '외부화된 설비', '유연한 평면'],
+        philosophy: '건물 내부의 유연성과 도시 광장의 활력을 극대화하기 위해 계단·배관·구조체를 외부 파사드로 꺼내는 과감한 하이테크 어휘를 구축했습니다.',
+        works: '퐁피두 센터(1977), 로이즈 빌딩(1986), 마드리드 바라하스 공항 T4'
+      },
+      {
+        match: ['i. m. pei', '페이'],
+        name: 'I. M. 페이 (Ieoh Ming Pei)',
+        years: '1917 – 2019 · 중국계 미국인 · 1983 프리츠커상',
+        keywords: ['순수 기하학', '빛과 콘크리트', '역사와의 대화'],
+        philosophy: '삼각형·원·피라미드 같은 순수 기하학적 형태와 정교한 빛의 유입을 통해 기존 역사적 맥락과 충돌하지 않으면서도 강렬한 현대적 랜드마크를 세웠습니다.',
+        works: '루브르 피라미드(1989), 미호 뮤지엄(1997), 도하 이슬람 예술 박물관'
+      },
+      {
+        match: ['frank gehry', '프랭크 게리'],
+        name: '프랭크 게리 (Frank Gehry)',
+        years: '1929 – · 캐나다/미국 · 1989 프리츠커상',
+        keywords: ['해체주의', '유선형 볼륨', '디지털 패브리케이션'],
+        philosophy: '직교 격자와 정형화된 박스를 벗어나 움직임과 감정을 담은 조각적 외피를 디지털 3D 모델링(CATIA)으로 현실화해 도시 재생의 촉매제를 만들었습니다.',
+        works: '구겐하임 미술관 빌바오(1997), 월트 디즈니 콘서트홀(2003), 루이 비통 재단 미술관(2014)'
+      },
+      {
+        match: ['pelli', '시저 펠리'],
+        name: '시저 펠리 (César Pelli)',
+        years: '1926 – 2019 · 아르헨티나/미국',
+        keywords: ['스카이라인', '커튼월', '지역적 기하학'],
+        philosophy: '초고층 마천루가 단순한 높이 경쟁을 넘어 그 도시의 문화적 정체성과 스카이라인에 우아하게 스며드는 표피와 실루엣을 추구했습니다.',
+        works: '페트로나스 트윈 타워(1999), 아베노 하루카스, IFC 홍콩'
+      },
+      {
+        match: ['fentress', '펜트리스'],
+        name: '커티스 펜트리스 (Curtis Fentress)',
+        years: '1947 – · 미국',
+        keywords: ['공항 건축', '자연 채광', '지역성'],
+        philosophy: '공항을 단순한 통과 시설이 아니라 그 나라의 첫인상을 결정짓는 공공 관문으로 보고, 전통 지붕선과 대공간 자연 채광을 결합했습니다.',
+        works: '인천국제공항 T1(2001), 덴버 국제공항(1995)'
+      },
+      {
+        match: ['koolhaas', '콜하스', 'oma'],
+        name: '렘 콜하스 (Rem Koolhaas / OMA)',
+        years: '1944 – · 네덜란드 · 2000 프리츠커상',
+        keywords: ['프로그램 다이어그램', '대도시성(Bigness)', '동선의 전복'],
+        philosophy: '형태보다 사회·도시적 프로그램의 작동 방식을 먼저 분석하며, 건물의 층과 기능을 예상치 못한 연속 동선으로 엮어 공공 건축의 역할을 재정의합니다.',
+        works: '시애틀 중앙 도서관(2004), 리움미술관 아동교육문화센터(2004), 쿤스트할 로테르담'
+      },
+      {
+        match: ['sanaa', '세지마', '니시자와'],
+        name: 'SANAA (세지마 가즈요 & 니시자와 류에)',
+        years: '1995 설립 · 일본 · 2010 프리츠커상',
+        keywords: ['투명성', '경계의 소멸', '비위계적 평면'],
+        philosophy: '벽의 두께와 구조의 존재감을 극한까지 얇게 줄여 내부와 외부, 중심과 주변의 위계를 없애고 공원과 도시가 자연스럽게 흘러드는 가벼운 건축을 지향합니다.',
+        works: '가나자와 21세기 미술관(2004), 롤렉스 러닝 센터(2010), 루브르 랑스(2012)'
+      },
+      {
+        match: ['c. y. lee', 'c. y. 리'],
+        name: 'C. Y. 리 (C. Y. Lee / 李祖原)',
+        years: '1938 – · 대만',
+        keywords: ['동양적 상징', '모듈화 타워', '내진·내풍 공학'],
+        philosophy: '서구의 초고층 구조 기술 위에 대나무 마디·전통 탑 등 동아시아의 길상적 상징과 형태 어휘를 결합해 지역 정체성을 드러내는 마천루를 설계했습니다.',
+        works: '타이베이 101(2004), 중타이 선종 사원'
+      },
+      {
+        match: ['som', 'adrian smith', 'david childs', '박춘명'],
+        name: 'SOM (Skidmore, Owings & Merrill)',
+        years: '1936 설립 · 미국',
+        keywords: ['구조-건축 통합', '초고층 코어 시스템', '모더니즘'],
+        philosophy: '건축가와 구조 엔지니어가 한 팀으로 협업해 튜브 구조·번들 튜브·버트레스 코어 같은 혁신적 구조 시스템을 통해 하늘을 향한 수직 도시의 한계를 넓혀왔습니다.',
+        works: '부르즈 할리파(2010), 원 월드 트레이드 센터(2014), 63빌딩(1985), 존 핸콕 센터'
+      },
+      {
+        match: ['safdie', '사프디'],
+        name: '모셰 사프디 (Moshe Safdie)',
+        years: '1938 – · 이스라엘/캐나다',
+        keywords: ['집합적 공중 정원', '메가스트럭처', '빛과 녹지'],
+        philosophy: '고밀도 도시 건축에서도 모든 사람에게 빛과 녹지, 전망이 열린 공중 공공 공간을 제공해야 한다는 신념으로 대담한 스카이브리지와 테라스 구조를 구현합니다.',
+        works: '해비타트 67(1967), 마리나 베이 샌즈(2010), 주얼 창이 공항(2019)'
+      },
+      {
+        match: ['zaha hadid', '자하 하디드'],
+        name: '자하 하디드 (Zaha Hadid)',
+        years: '1950 – 2016 · 이라크/영국 · 2004 프리츠커상',
+        keywords: ['파라메트릭 디자인', '연속 유동 공간', '무중력 기하학'],
+        philosophy: '직각과 단절된 층의 경계를 해체하고 지형과 동선의 흐름이 하나의 연속된 유체처럼 굽이치는 파라메트릭 형태를 통해 21세기 디지털 건축의 지평을 열었습니다.',
+        works: '헤이다르 알리예프 센터(2012), 동대문디자인플라자 DDP(2014), MAXXI 로마'
+      },
+      {
+        match: ['tadao ando', '안도 타다오'],
+        name: '안도 타다오 (Tadao Ando)',
+        years: '1941 – · 일본 · 1995 프리츠커상',
+        keywords: ['노출 콘크리트', '빛과 그림자', '기하학과 자연'],
+        philosophy: '절제된 노출 콘크리트 벽면과 순수 기하학적 매스 사이로 한 줄기 자연광, 바람, 물의 시퀀스를 끌어들여 인간의 내면을 성찰하게 하는 침묵의 공간을 만듭니다.',
+        works: '빛의 교회(1989), 지중 미술관(2004), 뮤지엄 산(2013)'
+      },
+      {
+        match: ['kpf', 'kohn pedersen'],
+        name: 'KPF (Kohn Pedersen Fox)',
+        years: '1976 설립 · 미국',
+        keywords: ['초고층 복합개발', '도시 맥락', '유선형 테이퍼링'],
+        philosophy: '초고층 타워가 주변 도시 교통·광장·보행 동선과 유기적으로 연결되면서도 지역 문화의 미감을 반영한 절제된 수직 비례를 갖추도록 설계합니다.',
+        works: '롯데월드타워(2017), 상하이 월드 파이낸셜 센터, 허드슨 야즈'
+      },
+      {
+        match: ['van alen', '밴 앨런'],
+        name: '윌리엄 밴 앨런 (William Van Alen)',
+        years: '1883 – 1954 · 미국',
+        keywords: ['아르 데코', '스테인리스 첨탑', '기계시대 장식'],
+        philosophy: '20세기 초 자동차와 기계 산업 시대의 역동성을 스테인리스 스틸 첨탑과 기하학적 장식으로 승화시켜 뉴욕 스카이라인의 가장 극적인 아이콘을 남겼습니다.',
+        works: '크라이슬러 빌딩(1930)'
+      },
+      {
+        match: ['toyo ito', '이토 도요'],
+        name: '이토 도요 (Toyo Ito)',
+        years: '1941 – · 일본 · 2013 프리츠커상',
+        keywords: ['유동적 공간', '비정형 튜브', '자연과의 연속성'],
+        philosophy: '견고한 벽으로 구획된 근대 건축의 틀을 깨고, 숲속의 나무나 물결처럼 사람과 미디어가 자유롭게 흐르고 머무는 개방적·유기적 구조를 탐구해 왔습니다.',
+        works: '센다이 미디어테크(2000), 도다스 오모테산도, 타이중 내셔널 시어터'
+      },
+      {
+        match: ['herzog', '헤르조그'],
+        name: '헤르조그 & 드 뫼롱 (Herzog & de Meuron)',
+        years: '1978 설립 · 스위스 · 2001 프리츠커상',
+        keywords: ['재료와 표피(Skin)', '장소성', '역사 구조 재해석'],
+        philosophy: '재료의 물성과 표피의 감각적 디테일을 깊이 탐구하며, 기존 산업 유산이나 도시 맥락 위에 현대적 구조물을 대담하게 중첩시켜 새로운 장소성을 창조합니다.',
+        works: '테이트 모던(2000), 엘브필하모니(2017), 프라다 아오야마, ST 송은 빌딩'
+      },
+      {
+        match: ['jean nouvel', '장 누벨'],
+        name: '장 누벨 (Jean Nouvel)',
+        years: '1945 – · 프랑스 · 2008 프리츠커상',
+        keywords: ['빛의 연출', '맥락주의', '기하학적 스크린'],
+        philosophy: '특정 양식을 반복하기보다 각 대지가 가진 기후·빛·역사적 문맥을 극대화하는 장치로서의 건축을 만들며, 특히 필터링된 빛과 그림자의 시학을 중시합니다.',
+        works: '아랍 세계 연구소(1987), 루브르 아부다비(2017), 리움미술관 현대미술관(2004)'
+      },
+      {
+        match: ['frank lloyd wright', '라이트'],
+        name: '프랭크 로이드 라이트 (Frank Lloyd Wright)',
+        years: '1867 – 1959 · 미국',
+        keywords: ['유기적 건축', '연속 공간', '프레리 스타일'],
+        philosophy: '건물은 자연 및 인간의 삶과 하나로 어우러져야 한다는 유기적 건축(Organic Architecture)을 주창하며, 방의 경계를 허문 연속된 동선과 대담한 구조 실험을 펼쳤습니다.',
+        works: '낙수장(1939), 솔로몬 R. 구겐하임 미술관(1959), 로비 하우스'
+      },
+      {
+        match: ['calatrava', '칼라트라바'],
+        name: '산티아고 칼라트라바 (Santiago Calatrava)',
+        years: '1951 – · 스페인',
+        keywords: ['생체모방 구조', '키네틱 건축', '구조 표현주의'],
+        philosophy: '건축가이자 구조 엔지니어로서 새의 날개나 인체의 척추처럼 자연의 골격에서 도출한 역학적 형태와 실제로 움직이는 키네틱 구조를 결합합니다.',
+        works: '밀워키 아트 뮤지엄 콰드라치 파빌리온(2001), 터닝 토르소, 오큘러스'
+      },
+      {
+        match: ['botta', '보타'],
+        name: '마리오 보타 (Mario Botta)',
+        years: '1943 – · 스위스',
+        keywords: ['신합리주의', '벽돌·석재 매스', '천창(Oculus)'],
+        philosophy: '단단한 대지 위에 뿌리내린 원통·사각 등의 묵직한 기하학적 매스와 정교한 조적 패턴, 그리고 하늘을 향해 열린 천창의 빛으로 영속적인 건축을 추구합니다.',
+        works: '리움미술관 고미술관(2004), 샌프란시스코 SFMOMA(1995), 교보타워'
+      },
+      {
+        match: ['kurokawa', '구로카와'],
+        name: '구로카와 기쇼 (Kisho Kurokawa)',
+        years: '1934 – 2007 · 일본',
+        keywords: ['메타볼리즘', '공생(Symbiosis)', '유기적 성장'],
+        philosophy: '건축과 도시는 고정된 완제품이 아니라 생명체처럼 신진대사하며 진화해야 한다는 메타볼리즘 운동을 이끌었고, 후기에는 이질적 요소의 공생을 강조했습니다.',
+        works: '나카긴 캡슐 타워(1972), 도쿄 국립신미술관(2007)'
+      },
+      {
+        match: ['snøhetta', '스뇌헤타'],
+        name: '스뇌헤타 (Snøhetta)',
+        years: '1989 설립 · 노르웨이',
+        keywords: ['건축·조경 통합', '공공 지붕 광장', '지속가능성'],
+        philosophy: '건축과 랜드스케이프의 경계를 허물어 건물의 지붕과 외피 자체를 시민 누구나 올라가고 머물 수 있는 사회적 공공 지형(Public Landscape)으로 환원합니다.',
+        works: '오슬로 오페라 하우스(2008), 알렉산드리아 도서관(2002), 언더(Under)'
+      },
+      {
+        match: ['shigeru ban', '반 시게루'],
+        name: '반 시게루 (Shigeru Ban)',
+        years: '1957 – · 일본 · 2014 프리츠커상',
+        keywords: ['목구조·종이 튜브', '가벼운 구조', '인도주의 건축'],
+        philosophy: '재료의 강도는 무게가 아니라 구조적 아이디어에서 나온다는 신념으로 목재·종이 튜브 등 친환경 경량 재료를 활용해 우아한 대공간과 재난 임시주택을 설계했습니다.',
+        works: '퐁피두 메스(2010), 하노버 엑스포 일본관, 크라이스트처치 카드보드 대성당'
+      },
+      {
+        match: ['henning larsen', '헤닝 라르센', 'olafur'],
+        name: '헤닝 라르센 & 올라퍼 엘리아슨',
+        years: '1959 설립 · 덴마크/아이슬란드',
+        keywords: ['북유럽의 빛', '결정형 파사드', '예술-건축 협업'],
+        philosophy: '북유럽의 변화무쌍한 자연광과 아이슬란드의 현무암 지질을 다면체 유리 파사드로 번역해 건물 자체가 거대한 빛의 프리즘이자 도시의 랜드마크가 되도록 했습니다.',
+        works: '하르파 콘서트홀(2011), 코펜하겐 오페라 하우스'
+      },
+      {
+        match: ['민현준'],
+        name: '민현준 (MPArt Architects)',
+        years: '1968 – · 대한민국',
+        keywords: ['마당의 현대화', '무정형 캠퍼스', '역사 경관과 공존'],
+        philosophy: '단일 거대 매스 대신 여러 개의 작은 전시실과 한국 전통의 마당·골목길을 수평적으로 엮어 경복궁·북촌의 역사적 스케일과 자연스럽게 호흡하는 공간을 만듭니다.',
+        works: '국립현대미술관 서울(2013), 경복궁 주변 문화시설 마스터플랜'
+      },
+      {
+        match: ['heatherwick', '헤더윅'],
+        name: '헤더윅 스튜디오 (Thomas Heatherwick)',
+        years: '1994 설립 · 영국',
+        keywords: ['산업 유산 재생', '공예적 스케일', '조각적 아트리움'],
+        philosophy: '건축·제품·조각의 경계 없이 장소에 담긴 역사와 재료의 잠재력을 재발견해, 사람들의 호기심과 감각을 자극하는 인간적·촉각적 공간을 창조합니다.',
+        works: '자이츠 MOCAA(2017), 콜 드롭스 야드, 리틀 아일랜드'
+      },
+      {
+        match: ['ala', 'ala 아키텍츠'],
+        name: 'ALA 아키텍츠 (ALA Architects)',
+        years: '2005 설립 · 핀란드',
+        keywords: ['시민 거실', '목재 캔틸레버', '핀란드 공공성'],
+        philosophy: '도서관을 단순한 서가가 아닌 도시의 민주적 거실로 재해석해, 목재와 스틸 브리지 구조로 열린 활동과 고요한 독서가 공존하는 3층의 입체적 단면을 구성했습니다.',
+        works: '헬싱키 중앙도서관 오디(2018), 킬덴 공연예술센터'
+      },
+      {
+        match: ['mvrdv'],
+        name: 'MVRDV',
+        years: '1993 설립 · 네덜란드',
+        keywords: ['데이터 기반 설계', '투명한 수장고', '도시적 위트'],
+        philosophy: '철저한 프로그램·데이터 분석을 바탕으로 기존 건물 유형의 금기(비공개 수장고 등)를 전복하고, 거울 파사드나 옥상 숲 같은 대담한 공공 경험을 제안합니다.',
+        works: '데포 보이만스 반 뵈닝언(2021), 마켓홀 로테르담, 서울로 7017'
+      }
+    ];
+
+    const BUILDING_ANALYSIS = {
+      'eiffel-tower': {
+        space: '4개의 경사진 다리 기둥이 상부로 모이며 3단계 전망 데크를 형성해 파리 도시 축을 수직으로 확장합니다.',
+        structure: '약 18,038개의 연철(Puddle Iron) 부재와 250만 개의 리벳으로 조립된 순수 격자 트러스 구조로 풍하중을 최소화했습니다.',
+        context: '샹 드 마르스 광장과 센강을 연결하는 만국박람회 관문에서 파리 전체의 시각적 기준점이 되었습니다.'
+      },
+      'empire-state': {
+        space: '저층부 5층 포디움에서 시작해 102층 전망대로 이어지는 전형적인 셋백(Setback) 수직 동선 구성을 취합니다.',
+        structure: '약 6만 톤의 철골 프레임과 인디애나 석회암·화강암·스테인리스 스틸 멀리언을 모듈화해 410일 만에 완공했습니다.',
+        context: '미드타운 맨해튼의 조밀한 그리드 속에서 일조권 규정을 충족하면서도 상징적 실루엣을 구축했습니다.'
+      },
+      'sydney-opera': {
+        space: '거대한 화강암 기단 위에 콘서트홀과 오페라 극장을 나란히 배치해 항구 전망과 공연 동선을 분리·연결합니다.',
+        structure: '반지름이 일정한 단일 구(Sphere) 표면에서 추출한 프리캐스트 콘크리트 리브 쉘 지붕과 105만 장의 유광 세라믹 타일로 덮여 있습니다.',
+        context: '베넬롱 포인트 반도 3면이 바다로 열린 지형을 활용해 어느 각도에서도 조각처럼 읽히는 해상 랜드마크입니다.'
+      },
+      'centre-pompidou': {
+        space: '내부 기둥과 코어를 제거해 한 층당 약 7,500㎡의 완전한 무주(Column-free) 가변 전시 공간을 확보했습니다.',
+        structure: '인장·압축 부재로 나눈 외부 철골 트러스(Gerberette)와 색채로 구분된 외부 설비 배관(파랑-공조, 초록-급수, 노랑-전기, 빨강-동선)이 특징입니다.',
+        context: '대지의 절반을 경사진 시민 광장으로 비워 마레 지구와 레알 지구를 잇는 열린 문화 플랫폼을 만들었습니다.'
+      },
+      'louvre-pyramid': {
+        space: '지하에 거대한 중앙 로비(Napoleon Hall)를 파내어 기존 궁전의 3개 윙으로 분산 진입하는 동선을 통합했습니다.',
+        structure: '최소 단면의 스테인리스 스틸 케이블·로드 텐션 트러스와 무색 저철분 접합 유리 673장으로 구현한 경량 구조입니다.',
+        context: '고전주의 르네상스·바로크 궁전 외관을 가리지 않으면서도 투명한 기하학으로 시대적 대비를 이룹니다.'
+      },
+      'guggenheim-bilbao': {
+        space: '50m 높이의 중앙 아트리움에서 세 갈래의 전시 동선이 방사형으로 뻗어나가는 입체적 평면을 갖습니다.',
+        structure: 'CATIA 3D 모델링으로 산출한 비정형 강철 프레임 위에 0.38mm 두께의 얇은 티타늄 패널을 비늘처럼 덮었습니다.',
+        context: '쇠퇴하던 네르비온 강변 조선소 부지를 세계적 문화 도시로 탈바꿈시킨 도시 재생(빌바오 효과)의 대표 사례입니다.'
+      },
+      'petronas-towers': {
+        space: '41~42층 높이의 58m 스카이브리지가 두 타워를 연결해 고층부 대피 동선과 공중 전망 공간을 제공합니다.',
+        structure: '이슬람 기하학(루브 엘 히즈브) 8각 별 평면에 고강도 철근콘크리트 코어와 외곽 기둥 링을 결합해 횡력 저항을 높였습니다.',
+        context: '쿠알라룸푸르 도심(KLCC) 공원 축의 중심으로 말레이시아의 근대화와 전통 문양을 동시에 상징합니다.'
+      },
+      'incheon-airport': {
+        space: '체크인 홀에서 탑승동으로 이어지는 대공간을 기둥 간격이 넓은 아치형 지붕 아래로 명쾌하게 정리했습니다.',
+        structure: '케이블 트러스와 현수선 지붕을 적용해 한국 전통 처마의 곡선과 경쾌한 천창 채광을 구현했습니다.',
+        context: '영종도 간척지 위에 세워진 동북아 허브 관문으로, 자연광과 실내 조경이 어우러진 여객 동선이 돋보입니다.'
+      },
+      'seattle-central-library': {
+        space: '프로그램을 안정적 상자(주차·자료실·사무)와 유동적 사이 공간(거실·열람실)으로 분리하고 4층 연속 경사로(Book Spiral)로 서가를 끊김 없이 연결했습니다.',
+        structure: '내진·횡력을 담당하는 다이아몬드형 강철 다이아그리드(Diagrid) 외피와 알루미늄 메시 삽입 유리로 눈부심과 열 부하를 줄였습니다.',
+        context: '4번가와 5번가의 급한 경사 지형을 두 개의 주 출입구로 자연스럽게 흡수해 도심 공공 거실 역할을 합니다.'
+      },
+      'walt-disney-hall': {
+        space: '객석이 무대를 360도로 둘러싸는 빈야드(Vineyard) 스타일 음향 홀과 공중 정원을 결합했습니다.',
+        structure: '내부 콘크리트 음향 쉘을 독립적으로 세우고 외부에 돛처럼 솟은 철골·무광/유광 스테인리스 스틸 패널을 둘렀습니다.',
+        context: 'LA 다운타운 그랜드 애비뉴 문화 축에 활력을 불어넣으며, 보행자가 건물 외곽 계단과 정원을 자유롭게 거닐 수 있습니다.'
+      },
+      'kanazawa-21': {
+        space: '정면과 후면 구분 없는 지름 112.5m 원형 평면 안에 크고 작은 직육면체 전시실과 무료 공공 존을 산재시켰습니다.',
+        structure: '초박형 철골 기둥과 얇은 평지붕 슬래브, 곡면 투명 유리 외피로 실내외 시각적 단절을 없앴습니다.',
+        context: '가나자와 시내 공원과 대학 부지를 잇는 열린 보행 통로처럼 작동해 시민들이 일상적으로 드나드는 미술관입니다.'
+      },
+      'taipei-101': {
+        space: '8층 단위로 반복되는 8개의 마디(총 64층) 위에 전망대와 첨탑이 얹힌 리듬감 있는 수직 동선 구성을 갖습니다.',
+        structure: '660톤 규모의 구체형 동조질량감쇠기(TMD)를 87~92층 사이에 매달아 태풍과 지진에 의한 흔들림을 최대 40% 저감합니다.',
+        context: '타이베이 신이 계획구의 금융 중심지로, 8이라는 숫자와 대나무 마디라는 동양적 은유를 초고층 공학으로 풀었습니다.'
+      },
+      'burj-khalifa': {
+        space: '세 개의 날개가 120도 각도로 뻗은 Y자형 평면이 위로 갈수록 나선형으로 셋백되며 주거·호텔·오피스를 수용합니다.',
+        structure: '중앙 육각형 코어를 3개의 날개 벽이 지탱하는 버트레스 코어(Buttressed Core) 시스템으로 828m 높이의 비틀림을 제어합니다.',
+        context: '사막 꽃 히메노칼리스에서 착안한 평면으로 강한 사막풍을 분산시키며 다운타운 두바이 수변 축의 정점을 이룹니다.'
+      },
+      'marina-bay-sands': {
+        space: '26도 기울어진 3개 호텔 타워 최상단(57층)을 340m 길이의 샌즈 스카이파크와 인피니티 풀로 하나로 묶었습니다.',
+        structure: '포스트텐션 콘크리트 슬래브와 타워 간 14개의 거대 스틸 브리지 트러스로 세계 최대 규모의 공중 캔틸레버(66.5m)를 지탱합니다.',
+        context: '싱가포르 마리나 베이 수변 스카이라인의 관문 역할을 하며 쇼핑몰·뮤지엄·극장을 보행 데크로 통합합니다.'
+      },
+      'heydar-aliyev': {
+        space: '외부 광장 지면이 그대로 솟아올라 지붕과 벽이 되며, 내부에 박물관·오디토리움·도서관을 기둥 없이 품습니다.',
+        structure: '콘크리트 코어와 복합 스페이스 프레임(Space Frame) 위에 12,000여 개의 맞춤형 GFRC·GFRP 패널을 틈새 없이 감쌌습니다.',
+        context: '구소련식 경직된 모더니즘 도시 맥락에서 벗어나 아제르바이잔의 미래지향적 공공 문화 공간을 표방합니다.'
+      },
+      'museum-san': {
+        space: '플라워 가든–워터 가든–본관–스톤 가든–제임스 터렐관–명상관으로 이어지는 700m 길이의 느린 감각적 시퀀스를 설계했습니다.',
+        structure: '원주 지역 파주석 돌담과 정교한 노출 콘크리트 벽면이 수면의 반사와 천창의 빛을 극대화합니다.',
+        context: '해발 275m 산악 지형 속에 건물을 길게 낮춰 앉혀 주변 능선과 하늘이 전시의 배경이 되도록 했습니다.'
+      },
+      'ddp': {
+        space: '기둥을 최소화한 대공간 전시관과 지하철역–동대문 상권–역사문화공원을 입체적으로 연결하는 연속 경사로가 특징입니다.',
+        structure: 'BIM 기반 3차원 곡면 45,133장의 서로 다른 알루미늄 외장 패널과 메가 트러스·스페이스 프레임을 결합했습니다.',
+        context: '옛 동대문운동장 터에서 발굴된 이간수문·성곽 유구와 공존하며 24시간 활력 넘치는 도심 보행 허브를 이룹니다.'
+      },
+      'fondation-lv': {
+        space: '빙산(Iceberg)이라 불리는 백색 콘크리트 전시실 매스 덩어리 주위를 12개의 거대한 유리 돛이 감싸며 테라스와 폭포 공간을 만듭니다.',
+        structure: 'DUHP(초고성능 섬유보강 콘크리트) 패널과 강철·집성 목재 하이브리드 빔으로 3,600장의 곡면 유리를 지탱합니다.',
+        context: '파리 불로뉴 숲의 아클리마타시옹 공원 수면 위에 띄운 듯한 배치를 통해 자연과 빛의 반사를 극대화했습니다.'
+      },
+      'lotte-world-tower': {
+        space: '저층 리테일·오피스에서 고층 레지던스·호텔·전망대(서울스카이)로 이어지는 수직 복합 도시 프로그램을 담았습니다.',
+        structure: '아우트리거(Outrigger)와 벨트 트러스, 8개의 메가 칼럼을 결합한 내진·내풍 구조로 한반도 최고층(555m)을 지탱합니다.',
+        context: '석촌호수와 한강이 만나는 잠실 사거리 축 위에서 한국 도자기의 유려한 곡선을 모티프로 한 원뿔형 실루엣을 그립니다.'
+      },
+      'chrysler-building': {
+        space: '저층부 상업·로비 공간에서 좁고 세장한 타워 샤프트로 급격히 상승하며, 삼각형 창이 뚫린 7단 아치형 크라운으로 마감됩니다.',
+        structure: '철골 프레임과 조적 외벽 위에 부식에 강한 니로스타(Nirosta) 스테인리스 스틸 클래딩과 독수리 가고일 장식을 적용했습니다.',
+        context: '1930년대 뉴욕 마천루 경쟁의 절정기에 렉싱턴 애비뉴의 랜드마크로 자리 잡았습니다.'
+      },
+      '63-building': {
+        space: '중앙 코어를 중심으로 좌우가 대칭을 이루는 오피스 평면과 최상층 전망대·지하 아쿠아리움으로 구성됩니다.',
+        structure: '황금빛 반사 복층 유리 커튼월과 사다리꼴 테이퍼링 단면이 여의도 한강변의 강풍에 효과적으로 대응합니다.',
+        context: '1980년대 한국 경제 성장과 한강 스카이라인의 상징으로 오랜 기간 서울의 대표 랜드마크 역할을 했습니다.'
+      },
+      'sendai-mediatheque': {
+        space: '투명 유리 상자 안에 갤러리·도서관·영상센터를 벽 없이 자유롭게 배치해 층마다 서로 다른 열린 분위기를 형성합니다.',
+        structure: '13개의 불규칙한 강철 격자 튜브 기둥이 7장의 얇은 하니컴 강판 슬래브를 뚫고 올라가며 수직 설비 샤프트 역할까지 겸합니다.',
+        context: '느티나무 가로수길(조젠지도리)의 나무 줄기와 수직 튜브 기둥이 시각적으로 겹치며 거리의 풍경이 실내로 연장됩니다.'
+      },
+      'the-shard': {
+        space: '오피스–레스토랑–호텔–주거–전망대(72층)가 수직으로 적층된 수직 도시(Vertical City) 모델을 따릅니다.',
+        structure: '서로 맞닿지 않고 살짝 어긋나 하늘로 솟은 8개의 경사진 저철분 유리 파편(Shard) 파사드가 빛의 각도에 따라 색을 바꿉니다.',
+        context: '런던 브리지 역의 철도 교통 허브 직상부에 위치해 대중교통 중심 고밀 개발의 전형을 보여줍니다.'
+      },
+      'one-wtc': {
+        space: '185피트 높이의 강화 콘크리트 기단 위에 8개의 이등변 삼각형 유리 면이 교차하며 팔각형 평면으로 상승합니다.',
+        structure: '초고강도 콘크리트 코어와 모멘트 저항 강철 외곽 프레임의 이중 구조로 극한의 안전성과 방폭 성능을 확보했습니다.',
+        context: '9/11 메모리얼 광장의 남쪽 축과 호흡하며, 미국 독립 연도를 뜻하는 1,776피트(541m) 높이로 로어 맨해튼을 재건했습니다.'
+      },
+      'elbphilharmonie': {
+        space: '기존 벽돌 창고(Kaispeicher A) 옥상 37m 지점에 시민 누구나 무료로 오르는 파노라마 광장(Plaza)을 두고, 그 위에 콘서트홀·호텔을 얹었습니다.',
+        structure: '1,100개 이상의 서로 다른 곡률·프린팅 패턴을 가진 유리 패널 파사드와 10,000개의 개별 가공 석고보드(White Skin)로 음향을 조율한 2,100석 홀이 핵심입니다.',
+        context: '엘베강 항만 창고 지구의 산업 유산 위에 물결치는 유리 왕관을 얹어 함부르크 항구의 새로운 문화 아이콘이 되었습니다.'
+      },
+      'louvre-abu-dhabi': {
+        space: '바다 위에 떠 있는 듯한 55개의 백색 아랍풍 큐브 전시실들이 좁은 골목과 수로로 이어지며 지붕 아래 작은 메디나(Medina)를 이룹니다.',
+        structure: '지름 180m, 무게 7,500톤의 거대한 돔을 4개의 숨겨진 교각만으로 지지하며, 8겹의 기하학적 별 패턴 격자가 햇빛을 걸러 빛의 비(Rain of Light)를 내립니다.',
+        context: '사디야트 문화 지구의 사막과 바다가 만나는 지점에서 미기후를 낮추는 그늘과 수공간을 결합했습니다.'
+      },
+      'guggenheim-ny': {
+        space: '바닥부터 천창까지 6바퀴를 도는 연속 경사로(Ramp)를 따라 내려오며 작품을 감상하는 혁명적인 단일 동선 공간입니다.',
+        structure: '외부를 향해 점점 넓어지는 역원추형 철근콘크리트 구조로, 내벽 자체가 구조적 캔틸레버 역할을 수행합니다.',
+        context: '센트럴파크 맞은편 5번가의 직교 도시 블록 속에서 묵직한 백색 나선형 매스로 강렬한 대비를 이룹니다.'
+      },
+      'milwaukee-art-museum': {
+        space: '호수를 향해 열린 대성당 같은 백색 리셉션 홀(Windhover Hall)과 다리로 연결된 전시장으로 구성됩니다.',
+        structure: '날개 길이 66m의 강철 루버(Burke Brise Soleil)가 유압 실린더로 실제로 여닫히며 실내 일조량과 온도를 조절합니다.',
+        context: '미시간 호수의 수평선과 돛단배 이미지에 호응하는 백색 구조물이 도시의 수변 관문을 형성합니다.'
+      },
+      'leeum-museum': {
+        space: '마리오 보타(고미술), 장 누벨(현대미술), 렘 콜하스(아동교육문화센터)가 설계한 3개 동이 남산 자락 경사를 따라 하나의 미술관 캠퍼스로 연결됩니다.',
+        structure: '테라코타 벽돌 원통(보타), 부식 스테인리스 스틸 블랙 박스(누벨), 공중에 뜬 블랙 콘크리트 캔틸레버(콜하스)가 극명한 물성 대비를 이룹니다.',
+        context: '한남동 주거지 골목의 좁은 스케일을 존중하면서도 각 거장의 어휘를 한 장소에서 경험할 수 있습니다.'
+      },
+      'nact-tokyo': {
+        space: '고정 소장품 없이 기획전만 열리는 대형 무주 전시실 12개와 중앙 로비에 솟은 2개의 거대한 역원뿔형 콘크리트 구조(카페·레스토랑)가 핵심입니다.',
+        structure: '물결치는 21.6m 높이의 이중 유리 커튼월과 무주 트러스 지붕으로 개방감을 극대화하고 에너지 부하를 줄였습니다.',
+        context: '도쿄 롯폰기의 고밀 도심 속에서 녹지 광장과 열린 아트리움을 통해 시민에게 개방된 문화 거점입니다.'
+      },
+      'oslo-opera-house': {
+        space: '피오르드 물속에서 솟아올라 옥상까지 걸어 올라갈 수 있는 경사 광장과 참나무(Oak) 웨이브 벽으로 감싼 주 공연장이 대조를 이룹니다.',
+        structure: '해수면 아래 파일 기초 위에 백색 카라라 대리석과 화강암 판재를 경사 슬래브에 얹어 보행 가능한 지붕을 만들었습니다.',
+        context: '항만 산업 지대였던 비요르비카(Bjørvika) 지구를 오슬로 시민들의 수변 광장으로 되돌려 놓았습니다.'
+      },
+      'pompidou-metz': {
+        space: '전통적 7자형 지붕 아래 세 개의 직사각형 전시 튜브가 서로 교차하며 쌓여 있고, 각 튜브의 끝 창이 메스 대성당 등 도시 랜드마크를 액자처럼 담아냅니다.',
+        structure: '중국 대나무 모자에서 영감을 받은 육각형 격자 집성 목재(Glulam) 지붕 위에 반투명 PTFE 유리섬유 막을 씌웠습니다.',
+        context: '파리 퐁피두 센터의 첫 지방 분관으로, 철도역 옆 신도심 공원과 역사 지구를 시각적으로 연결합니다.'
+      },
+      'harpa-concert-hall': {
+        space: '내부의 붉고 어두운 화산암 느낌의 메인 콘서트홀과 북극 바다를 향해 투명하게 열린 로비 동선이 극적인 대비를 이룹니다.',
+        structure: '현무암 주상절리를 본뜬 강철·유리 12면체 모듈(Quasi Brick) 파사드에 컬러 LED를 내장해 밤에도 오로라처럼 빛납니다.',
+        context: '레이캬비크 항구와 구도심이 만나는 수변에 위치해 아이슬란드 자연과 도시를 잇는 문화 중심지입니다.'
+      },
+      'mmca-seoul': {
+        space: '지상 층고를 낮춰 종친부·경복궁 조망을 해치지 않으면서 지하 3층까지 채광 마당(선큰 가든)을 통해 자연광을 깊숙이 끌어들이는 다중 마당 구조입니다.',
+        structure: '테라코타 루버와 화강암·유리를 조합해 한옥의 담장과 처마가 가진 수평적 비례를 현대적 무정형 매스로 번역했습니다.',
+        context: '경복궁·인왕산·북촌 한옥마을의 역사적 경관 속에 스며든 열린 도심형 미술관 캠퍼스입니다.'
+      },
+      'zeitz-mocaa': {
+        space: '1924년 지어진 57m 높이의 곡물 사일로 42개 콘크리트 원통 중앙부를 거대한 옥수수 알갱이 단면처럼 파내어 9층 높이의 대성당 같은 아트리움을 만들었습니다.',
+        structure: '기존 원통형 콘크리트 사일로의 껍질을 보존하면서 내부를 정밀 커팅하고 상부 유리 천창을 얹어 자연광을 끌어들였습니다.',
+        context: '케이프타운 V&A 워터프런트의 산업 유산을 아프리카 최대 현대미술관으로 재생한 대표적 어댑티브 리유즈(Adaptive Reuse) 사례입니다.'
+      },
+      'oodi-helsinki': {
+        space: '1층(활발한 시민 광장·극장) → 2층(메이커 스페이스·스튜디오) → 3층(고요한 책의 천국, 북 헤븐)으로 수직적 소음·활동 위계를 명확히 나눴습니다.',
+        structure: '2개의 거대한 강철 아치 트러스 브리지 구조가 기둥 없이 1층을 가로질러 넓은 개방형 로비를 만들고, 외벽은 핀란드산 가문비나무로 감쌌습니다.',
+        context: '핀란드 국회의사당 맞은편 광장에 자리해 지식과 시민 민주주의가 만나는 21세기 공공 도서관의 상징이 되었습니다.'
+      },
+      'depot-boijmans': {
+        space: '중앙 아트리움을 가로지르는 교차 계단을 따라 올라가며 15만 점 이상의 소장품 수장·복원 과정을 직접 들여다보는 투명한 동선입니다.',
+        structure: '지면 접지 면적을 줄이기 위해 아래가 좁고 위로 넓어지는 그릇(Bowl) 형태 콘크리트 구조에 1,664장의 반사 유리 패널을 부착했습니다.',
+        context: '로테르담 뮤지엄파크의 나무와 주변 건물을 거울 외피에 비추어 거대한 매스의 시각적 위압감을 지워냅니다.'
+      }
+    };
+
+    function getArchitectProfiles(architectStr) {
+      if (!architectStr) return [];
+      const lower = architectStr.toLowerCase();
+      return ARCHITECT_PROFILES.filter((p) => p.match.some((k) => lower.includes(k)));
+    }
+
+    // 공용 방명록(giscus) 설정: https://giscus.app/ko 에서 repoId, categoryId를 발급받아 입력하면 전 세계 방문자 공용 댓글이 활성화됩니다.
+    // Firebase Realtime Database (실시간 동시 접속자 수 + 공용 방명록 + 공용 건축·건축가 분석)
+    const FIREBASE_DB_URL = 'https://archbirthday-live-default-rtdb.firebaseio.com';
+
+    function fbSafeKey(str) {
+      return String(str || 'unknown').trim().toLowerCase().replace(/[.#$\[\]/]/g, '_');
+    }
+
+    function normalizeFbMap(val) {
+      if (!val || typeof val !== 'object') return {};
+      const out = {};
+      Object.entries(val).forEach(([k, entriesObj]) => {
+        if (entriesObj && typeof entriesObj === 'object') {
+          const arr = Object.values(entriesObj).filter(Boolean).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+          out[k] = arr;
+        }
+      });
+      return out;
+    }
+
+    async function initFirebaseSync() {
+      const dbUrl = FIREBASE_DB_URL.trim().replace(/\/$/, '');
+      if (!dbUrl) return;
+      try {
+        const [{ initializeApp }, { getDatabase, ref, set, remove, onValue, onDisconnect, serverTimestamp }] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js')
+        ]);
+        const app = initializeApp({ databaseURL: dbUrl });
+        const db = getDatabase(app);
+        state.fbApi = { db, ref, set, remove };
+
+        const sessionId = 'u_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
+        const userRef = ref(db, `presence/${sessionId}`);
+        const connectedRef = ref(db, '.info/connected');
+        const presenceRef = ref(db, 'presence');
+
+        onValue(connectedRef, (snap) => {
+          if (snap.val() === true) {
+            state.firebaseConnected = true;
+            onDisconnect(userRef).remove();
+            set(userRef, { onlineAt: serverTimestamp() });
+          }
+        });
+
+        onValue(presenceRef, (snap) => {
+          const val = snap.val();
+          const count = val ? Object.keys(val).length : 1;
+          const badge = document.getElementById('liveUsersBadge');
+          const text = document.getElementById('liveUsersText');
+          if (badge && text) {
+            text.textContent = `현재 ${count}명 접속 중`;
+            badge.classList.remove('hidden');
+          }
+        });
+
+        onValue(ref(db, 'guestbook'), (snap) => {
+          const fbMap = normalizeFbMap(snap.val());
+          if (Object.keys(fbMap).length) {
+            state.guestbook = fbMap;
+            persistGuestbook();
+            renderMainGuestbook();
+            renderCurrentView();
+            if (state.openModalItem && state.openModalTab === 'guestbook' && !document.getElementById('detailModal').classList.contains('hidden')) {
+              openDetailModal(state.openModalItem, 'guestbook');
+            }
+          }
+        });
+
+        onValue(ref(db, 'buildingAnalyses'), (snap) => {
+          const fbMap = normalizeFbMap(snap.val());
+          if (Object.keys(fbMap).length) {
+            state.userAnalyses = fbMap;
+            persistUserAnalyses();
+            if (state.openModalItem && state.openModalTab === 'analysis' && !document.getElementById('detailModal').classList.contains('hidden')) {
+              openDetailModal(state.openModalItem, 'analysis');
+            }
+          }
+        });
+
+        onValue(ref(db, 'birthdayTwins'), (snap) => {
+          const fbMap = normalizeFbMap(snap.val());
+          if (Object.keys(fbMap).length) {
+            state.birthdayTwins = fbMap;
+            persistBirthdayTwins();
+            renderCurrentView();
+            if (state.openModalItem && !document.getElementById('detailModal').classList.contains('hidden')) {
+              openDetailModal(state.openModalItem, state.openModalTab);
+            }
+          }
+        });
+
+        onValue(ref(db, 'architectAnalyses'), (snap) => {
+          const fbMap = normalizeFbMap(snap.val());
+          if (Object.keys(fbMap).length) {
+            state.architectAnalyses = fbMap;
+            persistArchitectAnalyses();
+            if (state.openModalItem && state.openModalTab === 'architect' && !document.getElementById('detailModal').classList.contains('hidden')) {
+              openDetailModal(state.openModalItem, 'architect');
+            }
+          }
+        });
+      } catch (e) {
+        // Fallback to localStorage if Firebase is unreachable
+      }
+    }
+
+    // 공용 방명록(giscus) 설정: https://giscus.app/ko 에서 repoId, categoryId를 발급받아 입력하면 전 세계 방문자 공용 댓글이 활성화됩니다.
+    const GISCUS_CONFIG = {
+      repo: 'Spacecap-MS/Archbirthday',
+      repoId: '',
+      category: 'General',
+      categoryId: '',
+      theme: 'light',
+      lang: 'ko'
+    };
+
+    function isGiscusReady() {
+      return Boolean(GISCUS_CONFIG.repo && GISCUS_CONFIG.repoId && GISCUS_CONFIG.categoryId);
+    }
+
+    function mountGiscus(container, item) {
+      if (!container || !isGiscusReady()) return;
+      container.innerHTML = '';
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.setAttribute('data-repo', GISCUS_CONFIG.repo);
+      script.setAttribute('data-repo-id', GISCUS_CONFIG.repoId);
+      script.setAttribute('data-category', GISCUS_CONFIG.category);
+      script.setAttribute('data-category-id', GISCUS_CONFIG.categoryId);
+      script.setAttribute('data-mapping', 'specific');
+      script.setAttribute('data-term', `${item.nameKo} (${item.id})`);
+      script.setAttribute('data-strict', '0');
+      script.setAttribute('data-reactions-enabled', '1');
+      script.setAttribute('data-emit-metadata', '0');
+      script.setAttribute('data-input-position', 'top');
+      script.setAttribute('data-theme', GISCUS_CONFIG.theme);
+      script.setAttribute('data-lang', GISCUS_CONFIG.lang);
+      container.appendChild(script);
+    }
+
+    function loadGuestbook() {
+      try {
+        const raw = localStorage.getItem('arch_birthday_guestbook_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') state.guestbook = parsed;
+        }
+      } catch (e) {
+        state.guestbook = {};
+      }
+    }
+
+    function persistGuestbook() {
+      try {
+        localStorage.setItem('arch_birthday_guestbook_v1', JSON.stringify(state.guestbook));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function getGuestbookEntries(id) {
+      return state.guestbook[fbSafeKey(id)] || state.guestbook[id] || [];
+    }
+
+    function addGuestbookEntry(id, author, text) {
+      const cleanAuthor = author.trim() || '방문자';
+      const cleanText = text.trim();
+      if (!cleanText) return;
+      const now = new Date();
+      const ts = Date.now();
+      const entryId = 'gb-' + ts + '-' + Math.random().toString(36).slice(2, 6);
+      const stamp = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const entry = { id: entryId, author: cleanAuthor, text: cleanText, createdAt: stamp, ts };
+      const safeId = fbSafeKey(id);
+      const list = state.guestbook[safeId] || state.guestbook[id] || [];
+      state.guestbook[safeId] = [entry, ...list];
+      persistGuestbook();
+      if (state.fbApi) {
+        const { db, ref, set } = state.fbApi;
+        set(ref(db, `guestbook/${safeId}/${entryId}`), entry).catch(() => {});
+      }
+    }
+
+    function deleteGuestbookEntry(buildingId, entryId) {
+      const safeId = fbSafeKey(buildingId);
+      const list = state.guestbook[safeId] || state.guestbook[buildingId] || [];
+      state.guestbook[safeId] = list.filter((e) => e.id !== entryId);
+      persistGuestbook();
+      if (state.fbApi) {
+        const { db, ref, remove } = state.fbApi;
+        remove(ref(db, `guestbook/${safeId}/${entryId}`)).catch(() => {});
+      }
+    }
+
+    function loadUserAnalyses() {
+      try {
+        const raw = localStorage.getItem('arch_birthday_analyses_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') state.userAnalyses = parsed;
+        }
+      } catch (e) {
+        state.userAnalyses = {};
+      }
+    }
+
+    function persistUserAnalyses() {
+      try {
+        localStorage.setItem('arch_birthday_analyses_v1', JSON.stringify(state.userAnalyses));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function getUserAnalyses(id) {
+      return state.userAnalyses[fbSafeKey(id)] || state.userAnalyses[id] || [];
+    }
+
+    function addUserAnalysis(id, { author, role, topic, text, sourceTitle, sourceUrl }) {
+      const now = new Date();
+      const ts = Date.now();
+      const entryId = 'ua-' + ts + '-' + Math.random().toString(36).slice(2, 6);
+      const stamp = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+      const entry = {
+        id: entryId,
+        author: author.trim() || '익명 건축인',
+        role: role.trim() || '건축 분야',
+        topic: topic || '공간 · 동선',
+        text: text.trim(),
+        sourceTitle: sourceTitle.trim(),
+        sourceUrl: sourceUrl.trim(),
+        createdAt: stamp,
+        ts
+      };
+      const safeId = fbSafeKey(id);
+      const list = state.userAnalyses[safeId] || state.userAnalyses[id] || [];
+      state.userAnalyses[safeId] = [entry, ...list];
+      persistUserAnalyses();
+      if (state.fbApi) {
+        const { db, ref, set } = state.fbApi;
+        set(ref(db, `buildingAnalyses/${safeId}/${entryId}`), entry).catch(() => {});
+      }
+    }
+
+    function deleteUserAnalysis(buildingId, entryId) {
+      const safeId = fbSafeKey(buildingId);
+      const list = state.userAnalyses[safeId] || state.userAnalyses[buildingId] || [];
+      state.userAnalyses[safeId] = list.filter((e) => e.id !== entryId);
+      persistUserAnalyses();
+      if (state.fbApi) {
+        const { db, ref, remove } = state.fbApi;
+        remove(ref(db, `buildingAnalyses/${safeId}/${entryId}`)).catch(() => {});
+      }
+    }
+
+    function loadArchitectAnalyses() {
+      try {
+        const raw = localStorage.getItem('arch_birthday_arch_analyses_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') state.architectAnalyses = parsed;
+        }
+      } catch (e) {
+        state.architectAnalyses = {};
+      }
+    }
+
+    function persistArchitectAnalyses() {
+      try {
+        localStorage.setItem('arch_birthday_arch_analyses_v1', JSON.stringify(state.architectAnalyses));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function getArchitectKey(architectStr) {
+      return fbSafeKey(architectStr);
+    }
+
+    function getArchitectAnalyses(architectStr) {
+      return state.architectAnalyses[getArchitectKey(architectStr)] || [];
+    }
+
+    function addArchitectAnalysis(architectStr, { author, role, topic, text, sourceTitle, sourceUrl }) {
+      const key = getArchitectKey(architectStr);
+      const now = new Date();
+      const ts = Date.now();
+      const entryId = 'aa-' + ts + '-' + Math.random().toString(36).slice(2, 6);
+      const stamp = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+      const entry = {
+        id: entryId,
+        author: author.trim() || '익명 건축인',
+        role: role.trim() || '건축 분야',
+        topic: topic || '설계 철학 · 어휘',
+        text: text.trim(),
+        sourceTitle: sourceTitle.trim(),
+        sourceUrl: sourceUrl.trim(),
+        createdAt: stamp,
+        ts
+      };
+      const list = state.architectAnalyses[key] ? [...state.architectAnalyses[key]] : [];
+      state.architectAnalyses[key] = [entry, ...list];
+      persistArchitectAnalyses();
+      if (state.fbApi) {
+        const { db, ref, set } = state.fbApi;
+        set(ref(db, `architectAnalyses/${key}/${entryId}`), entry).catch(() => {});
+      }
+    }
+
+    function deleteArchitectAnalysis(architectStr, entryId) {
+      const key = getArchitectKey(architectStr);
+      const list = state.architectAnalyses[key] || [];
+      state.architectAnalyses[key] = list.filter((e) => e.id !== entryId);
+      persistArchitectAnalyses();
+      if (state.fbApi) {
+        const { db, ref, remove } = state.fbApi;
+        remove(ref(db, `architectAnalyses/${key}/${entryId}`)).catch(() => {});
+      }
+    }
+
+    function loadBirthdayTwins() {
+      try {
+        const raw = localStorage.getItem('arch_birthday_twins_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') state.birthdayTwins = parsed;
+        }
+      } catch (e) {
+        state.birthdayTwins = {};
+      }
+    }
+
+    function persistBirthdayTwins() {
+      try {
+        localStorage.setItem('arch_birthday_twins_v1', JSON.stringify(state.birthdayTwins));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+
+    function getBirthdayTwins(id) {
+      return state.birthdayTwins[fbSafeKey(id)] || state.birthdayTwins[id] || [];
+    }
+
+    function addBirthdayTwin(id, name) {
+      const cleanName = (name || '').trim();
+      if (!cleanName) return;
+      const now = new Date();
+      const ts = Date.now();
+      const entryId = 'bt-' + ts + '-' + Math.random().toString(36).slice(2, 6);
+      const stamp = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+      const entry = { id: entryId, name: cleanName, createdAt: stamp, ts };
+      const safeId = fbSafeKey(id);
+      const list = state.birthdayTwins[safeId] || state.birthdayTwins[id] || [];
+      state.birthdayTwins[safeId] = [entry, ...list];
+      persistBirthdayTwins();
+      if (state.fbApi) {
+        const { db, ref, set } = state.fbApi;
+        set(ref(db, `birthdayTwins/${safeId}/${entryId}`), entry).catch(() => {});
+      }
+    }
+
+    function deleteBirthdayTwin(id, entryId) {
+      const safeId = fbSafeKey(id);
+      const list = state.birthdayTwins[safeId] || state.birthdayTwins[id] || [];
+      state.birthdayTwins[safeId] = list.filter((e) => e.id !== entryId);
+      persistBirthdayTwins();
+      if (state.fbApi) {
+        const { db, ref, remove } = state.fbApi;
+        remove(ref(db, `birthdayTwins/${safeId}/${entryId}`)).catch(() => {});
+      }
+    }
+
+    function escapeHTML(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
     function loadSaved() {
       try {
@@ -827,6 +1781,37 @@
       state.searchHistory = [dateStr, ...state.searchHistory.filter((d) => d !== dateStr)].slice(0, 8);
       persistHistory();
       renderHistory();
+    }
+
+    function renderMainGuestbook() {
+      const listEl = document.getElementById('mainGuestbookList');
+      const countEl = document.getElementById('mainGbCount');
+      if (!listEl) return;
+      const entries = getGuestbookEntries('site_main');
+      if (countEl) countEl.textContent = entries.length;
+      if (!entries.length) {
+        listEl.innerHTML = `<p class="text-xs text-[#8a8376] py-3 text-center">첫 번째 방명록을 남겨보세요!</p>`;
+        return;
+      }
+      listEl.innerHTML = entries.map((e) => `
+        <div class="rounded-xl bg-[#faf9f6] hairline-border px-3 py-2 space-y-1">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="text-xs font-bold text-[#1c1b18] truncate">${escapeHTML(e.author)}</span>
+              <span class="text-[10px] text-[#8a8376] shrink-0">${e.createdAt}</span>
+            </div>
+            <button type="button" data-main-gb-del="${e.id}" class="main-gb-del-btn text-[10px] text-[#8a8376] hover:text-[#9e5438] cursor-pointer shrink-0">삭제</button>
+          </div>
+          <p class="text-xs text-[#1c1b18] leading-relaxed whitespace-pre-line">${escapeHTML(e.text)}</p>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.main-gb-del-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          deleteGuestbookEntry('site_main', btn.dataset.mainGbDel);
+          renderMainGuestbook();
+        });
+      });
     }
 
     function renderHistory() {
@@ -891,8 +1876,65 @@
     }
 
     function updateBadges() {
-      document.getElementById('archiveCountBadge').textContent = CURATED_BUILDINGS.length;
       document.getElementById('savedCountBadge').textContent = state.savedIds.length;
+    }
+
+    function normBuildingStr(s) {
+      return String(s || '')
+        .toLowerCase()
+        .replace(/\([^)]*\)/g, '')
+        .replace(/[\s·.,\-_'"!?]/g, '');
+    }
+
+    function getWikiSlugFromUrl(u) {
+      if (!u || !u.includes('wikipedia.org/wiki/')) return '';
+      return decodeURIComponent(u.split('wikipedia.org/wiki/')[1].split('#')[0]).toLowerCase();
+    }
+
+    function getCleanDomain(u) {
+      try {
+        return new URL(u).hostname.replace(/^www\./, '').toLowerCase();
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function isSameBuilding(a, b) {
+      if (!a || !b) return false;
+      const slugA = getWikiSlugFromUrl(a.url);
+      const slugB = getWikiSlugFromUrl(b.url);
+      if (slugA && slugB && slugA === slugB) return true;
+
+      const domA = getCleanDomain(a.officialUrl);
+      const domB = getCleanDomain(b.officialUrl);
+      if (domA && domB && domA === domB) return true;
+
+      const nKoA = normBuildingStr(a.nameKo);
+      const nKoB = normBuildingStr(b.nameKo);
+      if (nKoA && nKoB && (nKoA === nKoB || nKoA.includes(nKoB) || nKoB.includes(nKoA))) return true;
+
+      const nEnA = a.nameEn && a.nameEn !== 'Wikidata Architectural Record' ? normBuildingStr(a.nameEn) : '';
+      const nEnB = b.nameEn && b.nameEn !== 'Wikidata Architectural Record' ? normBuildingStr(b.nameEn) : '';
+      if (nEnA && nEnB && (nEnA === nEnB || nEnA.includes(nEnB) || nEnB.includes(nEnA))) return true;
+
+      if (a.date && b.date && a.date === b.date) {
+        const tokensA = String(a.nameKo || '').toLowerCase().split(/[\s·()]+/).filter((t) => t.length >= 2);
+        const tokensB = String(b.nameKo || '').toLowerCase().split(/[\s·()]+/).filter((t) => t.length >= 2);
+        const overlap = tokensA.filter((t) => tokensB.includes(t));
+        if (overlap.length >= 2) return true;
+        if (overlap.length >= 1 && (tokensA.length <= 2 || tokensB.length <= 2)) return true;
+      }
+      return false;
+    }
+
+    function mergeUniqueBuildings(primary, secondary) {
+      const result = [...primary];
+      secondary.forEach((cand) => {
+        if (!result.some((existing) => isSameBuilding(existing, cand))) {
+          result.push(cand);
+        }
+      });
+      return result;
     }
 
     function matchLocal(dateStr) {
@@ -959,7 +2001,7 @@
           region: 'global',
           note: 'Wikidata 오픈 데이터(P1619 개관일 / P571 완공일)에서 실시간 조회된 건축물입니다.',
           imageUrl: row.image?.value ? row.image.value.replace('http://', 'https://') + '?width=800' : '',
-          url: row.article?.value || uri,
+          url: row.koArticle?.value || row.enArticle?.value || (qid ? `https://www.wikidata.org/wiki/${qid}` : uri.replace('http://', 'https://')),
           fromWikidata: true
         });
       });
@@ -978,7 +2020,7 @@
       const endIso = `${yStr}-${mStr}-${dStr}T23:59:59Z`;
 
       const exactSparql = `
-        SELECT DISTINCT ?item ?itemLabel ?architectLabel ?countryLabel ?typeLabel ?date ?article ?website ?streetAddress ?postalCode ?image WHERE {
+        SELECT DISTINCT ?item ?itemLabel ?architectLabel ?countryLabel ?typeLabel ?date ?koArticle ?enArticle ?website ?streetAddress ?postalCode ?image WHERE {
           ?item wdt:P84 ?architect .
           { ?item wdt:P1619 ?date . } UNION { ?item wdt:P571 ?date . }
           FILTER(?date >= "${startIso}"^^xsd:dateTime && ?date <= "${endIso}"^^xsd:dateTime)
@@ -988,20 +2030,22 @@
           OPTIONAL { ?item wdt:P6375 ?streetAddress . }
           OPTIONAL { ?item wdt:P281 ?postalCode . }
           OPTIONAL { ?item wdt:P18 ?image . }
-          OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }
+          OPTIONAL { ?koArticle schema:about ?item ; schema:isPartOf <https://ko.wikipedia.org/> . }
+          OPTIONAL { ?enArticle schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }
           SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en" . }
         }
         LIMIT 20
       `;
       const mdSparql = `
-        SELECT DISTINCT ?item ?itemLabel ?architectLabel ?countryLabel ?typeLabel ?date ?article ?image WHERE {
+        SELECT DISTINCT ?item ?itemLabel ?architectLabel ?countryLabel ?typeLabel ?date ?koArticle ?enArticle ?image WHERE {
           ?item wdt:P84 ?architect .
           ?item wdt:P1619 ?date .
           FILTER(MONTH(?date) = ${m} && DAY(?date) = ${d} && YEAR(?date) != ${y})
           OPTIONAL { ?item wdt:P17 ?country . }
           OPTIONAL { ?item wdt:P31 ?type . }
           OPTIONAL { ?item wdt:P18 ?image . }
-          OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }
+          OPTIONAL { ?koArticle schema:about ?item ; schema:isPartOf <https://ko.wikipedia.org/> . }
+          OPTIONAL { ?enArticle schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }
           SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en" . }
         }
         LIMIT 12
@@ -1103,7 +2147,7 @@
       return `
         <article class="hairline-border bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between gap-4">
           <div>
-            <div class="relative w-full h-44 rounded-xl overflow-hidden bg-[#f0ede6] mb-3.5 hairline-border">
+            <div data-detail-id="${item.id}" class="detail-open-btn relative w-full h-44 rounded-xl overflow-hidden bg-[#f0ede6] mb-3.5 hairline-border cursor-pointer group">
               <div class="absolute inset-0 flex flex-col items-center justify-center text-[#8a8376] px-4 text-center">
                 <svg class="w-7 h-7 opacity-40 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
@@ -1134,7 +2178,7 @@
                 ${saved ? '★ 저장됨' : '☆ 저장'}
               </button>
             </div>
-            <h3 class="text-lg font-bold text-[#1c1b18] leading-snug">${item.nameKo}</h3>
+            <h3 data-detail-id="${item.id}" class="detail-open-btn text-lg font-bold text-[#1c1b18] hover:text-[#9e5438] transition leading-snug cursor-pointer">${item.nameKo}</h3>
             <p class="text-xs text-[#656056] mt-0.5">${item.nameEn}</p>
             <div class="mt-3 pt-3 border-t border-[#f0ede6] space-y-1 text-sm">
               <p><span class="text-[#656056] font-medium">건축가:</span> <span class="font-semibold text-[#1c1b18]">${item.architect}</span></p>
@@ -1148,15 +2192,56 @@
               <p><span class="text-[#656056] font-medium">프로그램:</span> ${item.program || '건축물'}</p>
               ${formatHoursHTML(item.hours)}
             </div>
+            ${badgeLabel === '완벽 일치' ? (() => {
+              const twins = getBirthdayTwins(item.id);
+              return `
+                <div class="mt-3 rounded-xl bg-[#f3eae5]/70 hairline-border p-3 space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-[#9e5438]">🎂 이 건물과 생일이 똑같은 사람 (${twins.length})</span>
+                  </div>
+                  ${twins.length ? `
+                    <div class="flex flex-wrap gap-1.5">
+                      ${twins.map((t) => `
+                        <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-white text-[#1c1b18] hairline-border">
+                          ${escapeHTML(t.name)}
+                        </span>
+                      `).join('')}
+                    </div>
+                  ` : `<p class="text-[11px] text-[#656056]">생년월일이 똑같다면 첫 번째로 이름을 남겨보세요!</p>`}
+                  <form class="twin-add-form flex gap-1.5 pt-0.5" data-twin-id="${item.id}">
+                    <input
+                      type="text"
+                      maxlength="20"
+                      required
+                      placeholder="내 이름 또는 닉네임"
+                      class="flex-1 min-w-0 px-2.5 py-1 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                    />
+                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-[#9e5438] hover:bg-[#86452d] text-white text-[11px] font-semibold transition cursor-pointer shrink-0">
+                      이름 추가
+                    </button>
+                  </form>
+                </div>
+              `;
+            })() : ''}
           </div>
-          <div class="flex items-center justify-between pt-2">
-            <button
-              type="button"
-              data-detail-id="${item.id}"
-              class="detail-open-btn text-xs font-semibold text-[#1c1b18] hover:text-[#9e5438] underline underline-offset-4 cursor-pointer"
-            >
-              상세 정보 보기
-            </button>
+          <div class="flex items-center justify-between pt-2 gap-2">
+            <div class="flex items-center gap-2.5">
+              <button
+                type="button"
+                data-detail-id="${item.id}"
+                class="detail-open-btn text-xs font-semibold text-[#1c1b18] hover:text-[#9e5438] underline underline-offset-4 cursor-pointer"
+              >
+                분석 · 건축가 철학
+              </button>
+              <button
+                type="button"
+                data-detail-id="${item.id}"
+                data-detail-tab="guestbook"
+                class="detail-open-btn text-xs font-medium px-2 py-0.5 rounded-full bg-[#f0ede6] hover:bg-[#e5dfd4] text-[#1c1b18] transition cursor-pointer"
+              >
+                방명록 ${getGuestbookEntries(item.id).length}
+              </button>
+            </div>
             <div class="flex items-center gap-3">
               ${item.officialUrl ? `<a href="${item.officialUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-[#9e5438] hover:underline">공식 웹사이트 ↗</a>` : ''}
               <a
@@ -1196,14 +2281,8 @@
       const { exact, monthDay, year, wikidata, wikidataMd = [], wikidataStatus } = state.lastResults;
       const [y, m, d] = state.selectedDate.split('-');
 
-      // Merge exact local + exact wikidata (dedup by lowercase name)
-      const exactCombined = [...exact];
-      const seenNames = new Set(exact.map((x) => x.nameKo.toLowerCase()));
-      wikidata.forEach((w) => {
-        if (!seenNames.has(w.nameKo.toLowerCase())) {
-          exactCombined.push(w);
-        }
-      });
+      // Merge exact local + exact wikidata (dedup by slug, domain, normalized name, or same date + tokens)
+      const exactCombined = mergeUniqueBuildings(exact, wikidata);
 
       let html = '';
 
@@ -1227,11 +2306,7 @@
         `;
       }
 
-      const mdCombined = [...monthDay];
-      const seenMd = new Set(monthDay.map((x) => x.nameKo.toLowerCase()));
-      wikidataMd.forEach((w) => {
-        if (!seenMd.has(w.nameKo.toLowerCase())) mdCombined.push(w);
-      });
+      const mdCombined = mergeUniqueBuildings(monthDay, wikidataMd);
 
       if (mdCombined.length > 0) {
         html += renderGroup(
@@ -1311,11 +2386,350 @@
       );
     }
 
-    function openDetailModal(item) {
+    function openDetailModal(item, activeModalTab = 'analysis') {
       if (!item) return;
+      state.openModalItem = item;
+      state.openModalTab = activeModalTab;
       const modal = document.getElementById('detailModal');
       const body = document.getElementById('modalBody');
       const modalImg = item.imageUrl || state.imageCache[item.id] || '';
+      const analysis = BUILDING_ANALYSIS[item.id];
+      const profiles = getArchitectProfiles(item.architect);
+      const entries = getGuestbookEntries(item.id);
+
+      const addressBlock = item.address
+        ? `<p class="text-xs text-[#656056]">${item.address}${item.postalCode && !item.postalCode.startsWith('없음') && !item.address.includes(item.postalCode) ? ` (${item.postalCode})` : ''}</p>`
+        : (item.postalCode && !item.postalCode.startsWith('없음') ? `<p class="text-xs text-[#656056]">${item.postalCode}</p>` : '');
+
+      const searchBaseName = item.nameEn && item.nameEn !== 'Wikidata Architectural Record' ? item.nameEn : item.nameKo;
+      const archDailySearchUrl = `https://www.archdaily.com/search/projects?q=${encodeURIComponent(searchBaseName)}`;
+      const googleArchSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchBaseName + ' architecture')}`;
+      const architectSearchQuery = encodeURIComponent(`${item.architect} architecture philosophy`);
+
+      const analysisTabHTML = `
+        <div class="space-y-4">
+          <div class="space-y-2 text-sm border-b border-[#f0ede6] pb-3.5">
+            <p><span class="text-[#656056] font-medium">건축가:</span> <span class="font-semibold">${item.architect}</span></p>
+            <div class="flex items-start gap-1.5">
+              <span class="text-[#656056] font-medium shrink-0">위치:</span>
+              <div class="space-y-0.5">
+                <p>${item.location}</p>
+                ${addressBlock}
+              </div>
+            </div>
+            <p><span class="text-[#656056] font-medium">프로그램:</span> ${item.program || '건축물'}</p>
+            ${formatHoursHTML(item.hours)}
+          </div>
+          <p class="text-sm text-[#1c1b18] leading-relaxed">${item.note}</p>
+          ${analysis ? `
+            <div class="rounded-xl bg-[#faf9f6] hairline-border p-4 space-y-2.5">
+              <p class="text-xs font-bold tracking-wider uppercase text-[#9e5438]">건축 분석 자료</p>
+              <div class="text-xs sm:text-sm text-[#1c1b18] space-y-2 leading-relaxed">
+                <p><span class="font-semibold text-[#656056]">공간 · 동선:</span> ${analysis.space}</p>
+                <p><span class="font-semibold text-[#656056]">구조 · 재료:</span> ${analysis.structure}</p>
+                <p><span class="font-semibold text-[#656056]">도시 · 맥락:</span> ${analysis.context}</p>
+              </div>
+            </div>
+          ` : `
+            <div class="rounded-xl bg-[#faf9f6] hairline-border p-4 space-y-2">
+              <p class="text-xs font-bold tracking-wider uppercase text-[#9e5438]">추가 건축 자료 탐색</p>
+              <p class="text-xs text-[#656056] leading-relaxed">실시간 Wikidata에서 불러온 건축물입니다. 아래 링크를 통해 도면·평면·사진 등 심화 분석 자료를 바로 찾아볼 수 있습니다.</p>
+              <div class="flex flex-wrap gap-2 pt-1">
+                <a href="${googleArchSearchUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white hairline-border hover:bg-[#f0ede6] transition">구글 건축 자료 검색 ↗</a>
+                <a href="${archDailySearchUrl}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white hairline-border hover:bg-[#f0ede6] transition">ArchDaily 검색 ↗</a>
+              </div>
+            </div>
+          `}
+
+          <div class="rounded-xl bg-white hairline-border p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p class="text-xs font-bold tracking-wider uppercase text-[#1c1b18]">건축학도 · 실무자 추가 분석 <span class="text-[#9e5438]">(${getUserAnalyses(item.id).length})</span></p>
+                <p class="text-[11px] text-[#656056]">신뢰도 확인을 위해 참고 자료명과 출처 URL 첨부가 필수입니다.</p>
+              </div>
+              <button
+                type="button"
+                id="toggleAnalysisFormBtn"
+                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#f3eae5] text-[#9e5438] hover:bg-[#ead9d0] transition cursor-pointer"
+              >
+                + 분석 기고하기
+              </button>
+            </div>
+
+            <form id="userAnalysisForm" class="hidden rounded-xl bg-[#faf9f6] hairline-border p-3.5 space-y-2.5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input
+                  id="uaAuthorInput"
+                  type="text"
+                  maxlength="24"
+                  required
+                  placeholder="작성자 이름/닉네임 *"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                />
+                <select
+                  id="uaRoleInput"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                >
+                  <option value="건축학과 학생">건축학과 학생</option>
+                  <option value="건축설계 실무자">건축설계 실무자</option>
+                  <option value="구조·시공 엔지니어">구조·시공 엔지니어</option>
+                  <option value="건축 연구자·비평가">건축 연구자·비평가</option>
+                </select>
+                <select
+                  id="uaTopicInput"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                >
+                  <option value="공간 · 동선">공간 · 동선</option>
+                  <option value="구조 · 디테일">구조 · 디테일</option>
+                  <option value="재료 · 시공">재료 · 시공</option>
+                  <option value="도시 · 맥락">도시 · 맥락</option>
+                </select>
+              </div>
+              <textarea
+                id="uaTextInput"
+                rows="3"
+                maxlength="800"
+                required
+                placeholder="도면, 구조, 재료, 대지 맥락 등 직접 분석한 내용을 작성해 주세요. *"
+                class="w-full px-3 py-2 rounded-lg hairline-border bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30 resize-none"
+              ></textarea>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input
+                  id="uaSourceTitleInput"
+                  type="text"
+                  maxlength="80"
+                  required
+                  placeholder="참고 자료명 (예: ArchDaily 도면 자료) *"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                />
+                <input
+                  id="uaSourceUrlInput"
+                  type="url"
+                  required
+                  placeholder="출처 URL (https://...) *"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                />
+              </div>
+              <div class="flex items-center justify-between gap-2 pt-0.5">
+                <span class="text-[11px] text-[#8a8376]">출처 URL이 없는 글은 등록되지 않습니다.</span>
+                <button type="submit" class="px-4 py-1.5 rounded-lg bg-[#1c1b18] hover:bg-[#33312b] text-white text-xs font-semibold transition cursor-pointer">
+                  분석 등록
+                </button>
+              </div>
+            </form>
+
+            <div class="space-y-2.5">
+              ${getUserAnalyses(item.id).length ? getUserAnalyses(item.id).map((u) => `
+                <div class="rounded-xl bg-[#faf9f6] hairline-border p-3.5 space-y-2">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <span class="text-xs font-bold text-[#1c1b18]">${escapeHTML(u.author)}</span>
+                      <span class="text-[11px] px-2 py-0.5 rounded-full bg-[#e9e4da] text-[#1c1b18] font-medium">${escapeHTML(u.role)}</span>
+                      <span class="text-[11px] px-2 py-0.5 rounded-full bg-[#f3eae5] text-[#9e5438] font-medium">${escapeHTML(u.topic)}</span>
+                      <span class="text-[11px] text-[#8a8376]">${u.createdAt}</span>
+                    </div>
+                    <button type="button" data-ua-del="${u.id}" class="ua-del-btn text-[11px] text-[#8a8376] hover:text-[#9e5438] cursor-pointer">삭제</button>
+                  </div>
+                  <p class="text-xs sm:text-sm text-[#1c1b18] leading-relaxed whitespace-pre-line">${escapeHTML(u.text)}</p>
+                  <div class="pt-1.5 border-t border-[#e9e4da] flex items-center gap-1.5 text-[11px]">
+                    <span class="font-semibold text-[#656056] shrink-0">참고 출처:</span>
+                    <a href="${escapeHTML(u.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="text-[#9e5438] font-medium hover:underline truncate">
+                      ${escapeHTML(u.sourceTitle)} ↗
+                    </a>
+                  </div>
+                </div>
+              `).join('') : `
+                <p class="text-xs text-[#8a8376] py-1">아직 등록된 추가 분석이 없습니다. 첫 번째 건축 분석을 공유해 보세요.</p>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+
+      const architectTabHTML = `
+        <div class="space-y-3">
+          ${profiles.length ? profiles.map((p) => `
+            <div class="rounded-xl bg-[#faf9f6] hairline-border p-4 space-y-2.5">
+              <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <h4 class="text-base font-bold text-[#1c1b18]">${p.name}</h4>
+                <span class="text-xs text-[#656056]">${p.years}</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                ${p.keywords.map((kw) => `<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#f3eae5] text-[#9e5438]">#${kw}</span>`).join('')}
+              </div>
+              <p class="text-sm text-[#1c1b18] leading-relaxed">${p.philosophy}</p>
+              <p class="text-xs text-[#656056]"><span class="font-semibold">주요 대표작:</span> ${p.works}</p>
+            </div>
+          `).join('') : `
+            <div class="rounded-xl bg-[#faf9f6] hairline-border p-4 space-y-2">
+              <h4 class="text-sm font-bold text-[#1c1b18]">${item.architect}</h4>
+              <p class="text-xs text-[#656056] leading-relaxed">내장 프로필에 없는 실시간 조회 건축가입니다. 아래 링크를 통해 건축가의 설계 철학과 다른 작품들을 찾아보실 수 있습니다.</p>
+              <a href="https://www.google.com/search?q=${architectSearchQuery}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs font-semibold px-3 py-1.5 rounded-lg bg-white hairline-border hover:bg-[#f0ede6] transition">건축가 철학·작품 검색 ↗</a>
+            </div>
+          `}
+
+          <div class="rounded-xl bg-white hairline-border p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p class="text-xs font-bold tracking-wider uppercase text-[#1c1b18]">건축학도 · 실무자 건축가 분석 <span class="text-[#9e5438]">(${getArchitectAnalyses(item.architect).length})</span></p>
+                <p class="text-[11px] text-[#656056]">건축가의 철학·어휘·영향력에 대한 분석과 출처를 함께 공유해 보세요.</p>
+              </div>
+              <button
+                type="button"
+                id="toggleArchAnalysisFormBtn"
+                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#f3eae5] text-[#9e5438] hover:bg-[#ead9d0] transition cursor-pointer"
+              >
+                + 건축가 분석 기고하기
+              </button>
+            </div>
+
+            <form id="archAnalysisForm" class="hidden rounded-xl bg-[#faf9f6] hairline-border p-3.5 space-y-2.5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <input
+                  id="aaAuthorInput"
+                  type="text"
+                  maxlength="24"
+                  required
+                  placeholder="작성자 이름/닉네임 *"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                />
+                <select
+                  id="aaRoleInput"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                >
+                  <option value="건축학과 학생">건축학과 학생</option>
+                  <option value="건축설계 실무자">건축설계 실무자</option>
+                  <option value="구조·시공 엔지니어">구조·시공 엔지니어</option>
+                  <option value="건축 연구자·비평가">건축 연구자·비평가</option>
+                </select>
+                <select
+                  id="aaTopicInput"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                >
+                  <option value="설계 철학 · 어휘">설계 철학 · 어휘</option>
+                  <option value="형태 · 공간론">형태 · 공간론</option>
+                  <option value="재료 · 디테일">재료 · 디테일</option>
+                  <option value="작품 계보 · 영향">작품 계보 · 영향</option>
+                </select>
+              </div>
+              <textarea
+                id="aaTextInput"
+                rows="3"
+                maxlength="800"
+                required
+                placeholder="건축가의 설계 철학, 반복되는 공간 어휘, 타 작품과의 연결성 등을 작성해 주세요. *"
+                class="w-full px-3 py-2 rounded-lg hairline-border bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30 resize-none"
+              ></textarea>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input
+                  id="aaSourceTitleInput"
+                  type="text"
+                  maxlength="80"
+                  required
+                  placeholder="참고 자료명 (예: 프리츠커상 심사평, 인터뷰) *"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                />
+                <input
+                  id="aaSourceUrlInput"
+                  type="url"
+                  required
+                  placeholder="출처 URL (https://...) *"
+                  class="px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+                />
+              </div>
+              <div class="flex items-center justify-between gap-2 pt-0.5">
+                <span class="text-[11px] text-[#8a8376]">출처 URL이 없는 글은 등록되지 않습니다.</span>
+                <button type="submit" class="px-4 py-1.5 rounded-lg bg-[#1c1b18] hover:bg-[#33312b] text-white text-xs font-semibold transition cursor-pointer">
+                  건축가 분석 등록
+                </button>
+              </div>
+            </form>
+
+            <div class="space-y-2.5">
+              ${getArchitectAnalyses(item.architect).length ? getArchitectAnalyses(item.architect).map((u) => `
+                <div class="rounded-xl bg-[#faf9f6] hairline-border p-3.5 space-y-2">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <span class="text-xs font-bold text-[#1c1b18]">${escapeHTML(u.author)}</span>
+                      <span class="text-[11px] px-2 py-0.5 rounded-full bg-[#e9e4da] text-[#1c1b18] font-medium">${escapeHTML(u.role)}</span>
+                      <span class="text-[11px] px-2 py-0.5 rounded-full bg-[#f3eae5] text-[#9e5438] font-medium">${escapeHTML(u.topic)}</span>
+                      <span class="text-[11px] text-[#8a8376]">${u.createdAt}</span>
+                    </div>
+                    <button type="button" data-aa-del="${u.id}" class="aa-del-btn text-[11px] text-[#8a8376] hover:text-[#9e5438] cursor-pointer">삭제</button>
+                  </div>
+                  <p class="text-xs sm:text-sm text-[#1c1b18] leading-relaxed whitespace-pre-line">${escapeHTML(u.text)}</p>
+                  <div class="pt-1.5 border-t border-[#e9e4da] flex items-center gap-1.5 text-[11px]">
+                    <span class="font-semibold text-[#656056] shrink-0">참고 출처:</span>
+                    <a href="${escapeHTML(u.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="text-[#9e5438] font-medium hover:underline truncate">
+                      ${escapeHTML(u.sourceTitle)} ↗
+                    </a>
+                  </div>
+                </div>
+              `).join('') : `
+                <p class="text-xs text-[#8a8376] py-1">아직 등록된 건축가 분석이 없습니다. 첫 번째 건축가 비평·분석을 공유해 보세요.</p>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+
+      const guestbookTabHTML = isGiscusReady() ? `
+        <div class="space-y-3">
+          <p class="text-xs text-[#656056]">GitHub 계정으로 로그인해 모든 방문자와 방명록을 공유할 수 있습니다.</p>
+          <div id="giscusContainer" class="min-h-[180px]"></div>
+        </div>
+      ` : `
+        <div class="space-y-4">
+
+          <form id="guestbookForm" class="rounded-xl bg-[#faf9f6] hairline-border p-3.5 space-y-2.5">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input
+                id="gbAuthorInput"
+                type="text"
+                maxlength="24"
+                placeholder="닉네임 (예: 건축학도)"
+                class="sm:w-40 px-3 py-2 rounded-lg hairline-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30"
+              />
+              <span class="text-[11px] text-[#8a8376] self-center">${state.firebaseConnected ? "모든 방문자와 실시간 공유됩니다" : "실시간 공용 서버 연결 중..."}</span>
+            </div>
+            <textarea
+              id="gbTextInput"
+              rows="2"
+              maxlength="300"
+              required
+              placeholder="이 건축물에 대한 감상, 방문 후기, 공간 분석 메모를 남겨보세요."
+              class="w-full px-3 py-2 rounded-lg hairline-border bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#9e5438]/30 resize-none"
+            ></textarea>
+            <div class="flex justify-end">
+              <button type="submit" class="px-4 py-1.5 rounded-lg bg-[#1c1b18] hover:bg-[#33312b] text-white text-xs font-semibold transition cursor-pointer">
+                방명록 남기기
+              </button>
+            </div>
+          </form>
+          <div class="space-y-2.5">
+            ${entries.length ? entries.map((e) => `
+              <div class="rounded-xl bg-white hairline-border p-3.5 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-[#1c1b18]">${escapeHTML(e.author)}</span>
+                    <span class="text-[11px] text-[#8a8376]">${e.createdAt}</span>
+                  </div>
+                  <button type="button" data-gb-del="${e.id}" class="gb-del-btn text-[11px] text-[#8a8376] hover:text-[#9e5438] cursor-pointer">삭제</button>
+                </div>
+                <p class="text-xs sm:text-sm text-[#1c1b18] leading-relaxed whitespace-pre-line">${escapeHTML(e.text)}</p>
+              </div>
+            `).join('') : `
+              <p class="text-xs text-center text-[#8a8376] py-4">아직 작성된 방명록이 없습니다. 첫 번째 감상을 남겨보세요!</p>
+            `}
+          </div>
+        </div>
+      `;
+
+      const tabBtnClass = (tabKey) =>
+        activeModalTab === tabKey
+          ? 'bg-[#1c1b18] text-white'
+          : 'bg-[#f0ede6] text-[#1c1b18] hover:bg-[#e5dfd4]';
+
       body.innerHTML = `
         <div class="relative w-full h-52 rounded-xl overflow-hidden bg-[#f0ede6] mb-4 hairline-border">
           <div class="absolute inset-0 flex flex-col items-center justify-center text-[#8a8376] px-4 text-center">
@@ -1336,26 +2750,121 @@
         <p class="text-xs font-mono font-semibold text-[#9e5438]">${item.date}</p>
         <h3 id="modalTitle" class="text-xl font-bold text-[#1c1b18] mt-1">${item.nameKo}</h3>
         <p class="text-xs text-[#656056]">${item.nameEn}</p>
-        <div class="mt-4 space-y-2 text-sm border-y border-[#f0ede6] py-3">
-          <p><span class="text-[#656056] font-medium">건축가:</span> <span class="font-semibold">${item.architect}</span></p>
-          <div class="flex items-start gap-1.5">
-                <span class="text-[#656056] font-medium shrink-0">위치:</span>
-                <div class="space-y-0.5">
-                  <p>${item.location}</p>
-                  ${item.address ? `<p class="text-xs text-[#656056]">${item.address}${item.postalCode && !item.postalCode.startsWith('없음') && !item.address.includes(item.postalCode) ? ` (${item.postalCode})` : ''}</p>` : (item.postalCode && !item.postalCode.startsWith('없음') ? `<p class="text-xs text-[#656056]">${item.postalCode}</p>` : '')}
-                </div>
-              </div>
-          <p><span class="text-[#656056] font-medium">프로그램:</span> ${item.program || '건축물'}</p>
+
+        <div class="flex flex-wrap gap-2 mt-4 mb-4">
+          <button type="button" data-modal-tab="analysis" class="modal-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${tabBtnClass('analysis')}">건물 분석</button>
+          <button type="button" data-modal-tab="architect" class="modal-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${tabBtnClass('architect')}">건축가 철학</button>
+          <button type="button" data-modal-tab="guestbook" class="modal-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${tabBtnClass('guestbook')}">방명록 (${entries.length})</button>
         </div>
-        <p class="text-sm text-[#1c1b18] leading-relaxed mt-4">${item.note}</p>
-        <div class="mt-5 flex flex-wrap justify-end gap-2">
+
+        <div>
+          ${activeModalTab === 'analysis' ? analysisTabHTML : activeModalTab === 'architect' ? architectTabHTML : guestbookTabHTML}
+        </div>
+
+        <div class="mt-5 pt-3 border-t border-[#f0ede6] flex flex-wrap justify-end gap-2">
           ${item.officialUrl ? `<a href="${item.officialUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-[#9e5438] text-white text-xs font-semibold hover:bg-[#86452d] transition">공식 웹사이트 ↗</a>` : ''}
           <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-[#1c1b18] text-white text-xs font-semibold hover:bg-[#33312b] transition">
             원문 정보 보기 ↗
           </a>
         </div>
       `;
+
+      body.querySelectorAll('.modal-tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => openDetailModal(item, btn.dataset.modalTab));
+      });
+
+      const toggleUaBtn = document.getElementById('toggleAnalysisFormBtn');
+      const uaForm = document.getElementById('userAnalysisForm');
+      if (toggleUaBtn && uaForm) {
+        toggleUaBtn.addEventListener('click', () => {
+          uaForm.classList.toggle('hidden');
+        });
+      }
+      if (uaForm) {
+        uaForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const author = document.getElementById('uaAuthorInput').value;
+          const role = document.getElementById('uaRoleInput').value;
+          const topic = document.getElementById('uaTopicInput').value;
+          const text = document.getElementById('uaTextInput').value;
+          const sourceTitle = document.getElementById('uaSourceTitleInput').value;
+          const sourceUrl = document.getElementById('uaSourceUrlInput').value.trim();
+          if (!/^https?:\/\//i.test(sourceUrl)) {
+            showToast('출처 URL은 https:// 또는 http://로 시작해야 합니다.');
+            return;
+          }
+          if (!text.trim() || !sourceTitle.trim()) return;
+          addUserAnalysis(item.id, { author, role, topic, text, sourceTitle, sourceUrl });
+          showToast('출처가 포함된 건축 분석이 등록되었습니다.');
+          openDetailModal(item, 'analysis');
+        });
+      }
+      body.querySelectorAll('.ua-del-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          deleteUserAnalysis(item.id, btn.dataset.uaDel);
+          openDetailModal(item, 'analysis');
+        });
+      });
+
+      const toggleAaBtn = document.getElementById('toggleArchAnalysisFormBtn');
+      const aaForm = document.getElementById('archAnalysisForm');
+      if (toggleAaBtn && aaForm) {
+        toggleAaBtn.addEventListener('click', () => {
+          aaForm.classList.toggle('hidden');
+        });
+      }
+      if (aaForm) {
+        aaForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const author = document.getElementById('aaAuthorInput').value;
+          const role = document.getElementById('aaRoleInput').value;
+          const topic = document.getElementById('aaTopicInput').value;
+          const text = document.getElementById('aaTextInput').value;
+          const sourceTitle = document.getElementById('aaSourceTitleInput').value;
+          const sourceUrl = document.getElementById('aaSourceUrlInput').value.trim();
+          if (!/^https?:\/\//i.test(sourceUrl)) {
+            showToast('출처 URL은 https:// 또는 http://로 시작해야 합니다.');
+            return;
+          }
+          if (!text.trim() || !sourceTitle.trim()) return;
+          addArchitectAnalysis(item.architect, { author, role, topic, text, sourceTitle, sourceUrl });
+          showToast('출처가 포함된 건축가 분석이 등록되었습니다.');
+          openDetailModal(item, 'architect');
+        });
+      }
+      body.querySelectorAll('.aa-del-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          deleteArchitectAnalysis(item.architect, btn.dataset.aaDel);
+          openDetailModal(item, 'architect');
+        });
+      });
+
+      const gbForm = document.getElementById('guestbookForm');
+      if (gbForm) {
+        gbForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const author = document.getElementById('gbAuthorInput').value;
+          const text = document.getElementById('gbTextInput').value;
+          if (!text.trim()) return;
+          addGuestbookEntry(item.id, author, text);
+          showToast('방명록이 등록되었습니다.');
+          renderCurrentView();
+          openDetailModal(item, 'guestbook');
+        });
+      }
+
+      body.querySelectorAll('.gb-del-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          deleteGuestbookEntry(item.id, btn.dataset.gbDel);
+          renderCurrentView();
+          openDetailModal(item, 'guestbook');
+        });
+      });
+
       hydrateImages(body);
+      if (activeModalTab === 'guestbook' && isGiscusReady()) {
+        mountGiscus(document.getElementById('giscusContainer'), item);
+      }
       modal.classList.remove('hidden');
     }
 
@@ -1370,7 +2879,18 @@
       root.querySelectorAll('.detail-open-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
           const item = findItemById(btn.dataset.detailId);
-          if (item) openDetailModal(item);
+          if (item) openDetailModal(item, btn.dataset.detailTab || 'analysis');
+        });
+      });
+      root.querySelectorAll('.twin-add-form').forEach((form) => {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const input = form.querySelector('input');
+          const name = input ? input.value.trim() : '';
+          if (!name) return;
+          addBirthdayTwin(form.dataset.twinId, name);
+          showToast(`${name}님이 같은 생일 명단에 등록되었습니다!`);
+          renderCurrentView();
         });
       });
     }
@@ -1379,6 +2899,110 @@
       if (state.activeTab === 'matcher') renderMatcherResults();
       else if (state.activeTab === 'archive') renderArchive();
       else if (state.activeTab === 'saved') renderSaved();
+    }
+
+    async function searchWikidataByName(query) {
+      try {
+        const koUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=ko&uselang=ko&type=item&limit=8&format=json&origin=*`;
+        const enUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(query)}&language=en&uselang=ko&type=item&limit=8&format=json&origin=*`;
+        const [koRes, enRes] = await Promise.allSettled([fetch(koUrl), fetch(enUrl)]);
+        const qidSet = new Set();
+        for (const r of [koRes, enRes]) {
+          if (r.status === 'fulfilled' && r.value.ok) {
+            const data = await r.value.json();
+            (data?.search || []).forEach((x) => { if (x.id) qidSet.add(x.id); });
+          }
+        }
+        const qids = Array.from(qidSet).slice(0, 12);
+        if (!qids.length) return [];
+        const valuesClause = qids.map((id) => `wd:${id}`).join(' ');
+        const sparql = `
+          SELECT DISTINCT ?item ?itemLabel ?architectLabel ?countryLabel ?typeLabel ?date ?koArticle ?enArticle ?website ?streetAddress ?postalCode ?image WHERE {
+            {
+              VALUES ?item { ${valuesClause} }
+              ?item wdt:P84 ?architect .
+            } UNION {
+              VALUES ?architect { ${valuesClause} }
+              ?item wdt:P84 ?architect .
+            }
+            OPTIONAL { ?item wdt:P1619 ?d1 . }
+            OPTIONAL { ?item wdt:P571 ?d2 . }
+            BIND(COALESCE(?d1, ?d2) AS ?date)
+            OPTIONAL { ?item wdt:P17 ?country . }
+            OPTIONAL { ?item wdt:P31 ?type . }
+            OPTIONAL { ?item wdt:P856 ?website . }
+            OPTIONAL { ?item wdt:P6375 ?streetAddress . }
+            OPTIONAL { ?item wdt:P281 ?postalCode . }
+            OPTIONAL { ?item wdt:P18 ?image . }
+            OPTIONAL { ?koArticle schema:about ?item ; schema:isPartOf <https://ko.wikipedia.org/> . }
+            OPTIONAL { ?enArticle schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "ko,en" . }
+          }
+          LIMIT 24
+        `;
+        const rows = await runSparql(sparql);
+        return parseBindings(rows, '날짜 미상');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    async function runNameSearch(rawQuery) {
+      const q = (rawQuery || '').trim();
+      if (!q) return;
+      const lower = q.toLowerCase();
+      const localMatches = CURATED_BUILDINGS.filter((b) =>
+        b.nameKo.toLowerCase().includes(lower) ||
+        b.nameEn.toLowerCase().includes(lower) ||
+        b.architect.toLowerCase().includes(lower) ||
+        b.location.toLowerCase().includes(lower) ||
+        (b.program && b.program.toLowerCase().includes(lower))
+      );
+
+      const banner = document.getElementById('statusBanner');
+      const statusText = document.getElementById('statusText');
+      const statusBadge = document.getElementById('statusBadge');
+      const container = document.getElementById('resultsSection');
+
+      banner.classList.remove('hidden');
+      statusText.textContent = `"${q}"에 대한 건축물 정보를 검색하는 중...`;
+      statusBadge.textContent = '이름 검색';
+
+      const renderCombined = (wdMatches) => {
+        const combined = mergeUniqueBuildings(localMatches, wdMatches);
+        state.lastResults = {
+          exact: localMatches,
+          monthDay: [],
+          year: [],
+          wikidata: wdMatches,
+          wikidataMd: [],
+          wikidataStatus: 'ok'
+        };
+
+        if (combined.length) {
+          container.innerHTML = renderGroup(
+            `"${escapeHTML(q)}" 검색 결과`,
+            '내장 아카이브와 Wikidata에서 찾은 건축물입니다.',
+            combined,
+            '검색 일치'
+          );
+          attachCardListeners(container);
+        } else {
+          container.innerHTML = `
+            <div class="hairline-border bg-white rounded-2xl p-6 text-center space-y-2">
+              <p class="text-sm font-semibold text-[#1c1b18]">"${escapeHTML(q)}"에 해당하는 건축물을 찾지 못했습니다.</p>
+              <p class="text-xs text-[#656056]">다른 철자나 영문명, 건축가 이름으로 다시 검색해 보세요.</p>
+            </div>
+          `;
+        }
+      };
+
+      renderCombined([]);
+      const wdMatches = await searchWikidataByName(q);
+      renderCombined(wdMatches);
+      const totalCount = mergeUniqueBuildings(localMatches, wdMatches).length;
+      statusText.textContent = `"${q}" 검색 완료 — 총 ${totalCount}건의 건축물을 찾았습니다.`;
+      statusBadge.textContent = '검색 완료';
     }
 
     async function runSearch(dateStr) {
@@ -1493,8 +3117,35 @@
     // Init
     loadSaved();
     loadHistory();
+    loadGuestbook();
+    loadUserAnalyses();
+    loadArchitectAnalyses();
+    loadBirthdayTwins();
     updateBadges();
-    runSearch(state.selectedDate);
+    const mainGbForm = document.getElementById('mainGuestbookForm');
+    if (mainGbForm) {
+      mainGbForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const author = document.getElementById('mainGbAuthor').value;
+        const text = document.getElementById('mainGbText').value;
+        if (!text.trim()) return;
+        addGuestbookEntry('site_main', author, text);
+        document.getElementById('mainGbText').value = '';
+        renderMainGuestbook();
+        showToast('메인 방명록에 등록되었습니다.');
+      });
+    }
+    const nameSearchForm = document.getElementById('nameSearchForm');
+    if (nameSearchForm) {
+      nameSearchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = document.getElementById('buildingNameInput').value;
+        if (val.trim()) runNameSearch(val);
+      });
+    }
+    renderHistory();
+    renderMainGuestbook();
+    initFirebaseSync();
   </script>
 </body>
 </html>
