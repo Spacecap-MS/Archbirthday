@@ -181,7 +181,7 @@
                 방명록 <span id="mainGbCount" class="text-sm font-semibold text-[#9e5438] ml-1">0</span>
               </h2>
             </div>
-            <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f0ede6] text-[#656056]">실시간 공용</span>
+            <span id="mainGbStatusBadge" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f0ede6] text-[#656056]">연결 확인 중...</span>
           </div>
 
           <form id="mainGuestbookForm" class="space-y-2">
@@ -1350,8 +1350,39 @@
     }
 
     // 공용 방명록(giscus) 설정: https://giscus.app/ko 에서 repoId, categoryId를 발급받아 입력하면 전 세계 방문자 공용 댓글이 활성화됩니다.
-    // Firebase Realtime Database (실시간 동시 접속자 수 + 공용 방명록 + 공용 건축·건축가 분석)
-    const FIREBASE_DB_URL = 'https://archbirthday-live-default-rtdb.firebaseio.com';
+    // Firebase Realtime Database (리전 자동 감지 + 실시간 동시 접속자 수 + 공용 방명록 + 공용 건축·건축가 분석)
+    const FIREBASE_DB_CANDIDATES = [
+      'https://archbirthday-live-default-rtdb.asia-southeast1.firebasedatabase.app',
+      'https://archbirthday-live-default-rtdb.firebaseio.com',
+      'https://archbirthday-live-default-rtdb.europe-west1.firebasedatabase.app'
+    ];
+
+    function setMainGbStatus(text, isOk, isError = false) {
+      const el = document.getElementById('mainGbStatusBadge');
+      if (!el) return;
+      el.textContent = text;
+      el.className = isOk
+        ? 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#e8f3ea] text-[#236332]'
+        : isError
+        ? 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#fdecea] text-[#b42318]'
+        : 'text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f0ede6] text-[#656056]';
+    }
+
+    async function resolveFirebaseDbUrl() {
+      let sawPermissionDenied = false;
+      for (const candidate of FIREBASE_DB_CANDIDATES) {
+        try {
+          const res = await fetch(`${candidate}/presence.json?shallow=true`);
+          if (res.ok) return { url: candidate, status: 'ok' };
+          if (res.status === 401 || res.status === 403) {
+            sawPermissionDenied = true;
+          }
+        } catch (e) {
+          // Try next region
+        }
+      }
+      return { url: '', status: sawPermissionDenied ? 'denied' : 'unreachable' };
+    }
 
     function fbSafeKey(str) {
       return String(str || 'unknown').trim().toLowerCase().replace(/[.#$\[\]/]/g, '_');
@@ -1370,14 +1401,21 @@
     }
 
     async function initFirebaseSync() {
-      const dbUrl = FIREBASE_DB_URL.trim().replace(/\/$/, '');
-      if (!dbUrl) return;
+      const resolved = await resolveFirebaseDbUrl();
+      if (resolved.status === 'denied') {
+        setMainGbStatus('Firebase 권한 잠김 (규칙 확인)', false, true);
+        return;
+      }
+      if (!resolved.url) {
+        setMainGbStatus('로컬 저장 모드', false, false);
+        return;
+      }
       try {
         const [{ initializeApp }, { getDatabase, ref, set, remove, onValue, onDisconnect, serverTimestamp }] = await Promise.all([
           import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
           import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js')
         ]);
-        const app = initializeApp({ databaseURL: dbUrl });
+        const app = initializeApp({ databaseURL: resolved.url });
         const db = getDatabase(app);
         state.fbApi = { db, ref, set, remove };
 
@@ -1389,8 +1427,9 @@
         onValue(connectedRef, (snap) => {
           if (snap.val() === true) {
             state.firebaseConnected = true;
+            setMainGbStatus('실시간 공용 연결됨', true);
             onDisconnect(userRef).remove();
-            set(userRef, { onlineAt: serverTimestamp() });
+            set(userRef, { onlineAt: serverTimestamp() }).catch(() => {});
           }
         });
 
@@ -1407,56 +1446,49 @@
 
         onValue(ref(db, 'guestbook'), (snap) => {
           const fbMap = normalizeFbMap(snap.val());
-          if (Object.keys(fbMap).length) {
-            state.guestbook = fbMap;
-            persistGuestbook();
-            renderMainGuestbook();
-            renderCurrentView();
-            if (state.openModalItem && state.openModalTab === 'guestbook' && !document.getElementById('detailModal').classList.contains('hidden')) {
-              openDetailModal(state.openModalItem, 'guestbook');
-            }
+          state.guestbook = fbMap;
+          persistGuestbook();
+          renderMainGuestbook();
+          renderCurrentView();
+          if (state.openModalItem && state.openModalTab === 'guestbook' && !document.getElementById('detailModal').classList.contains('hidden')) {
+            openDetailModal(state.openModalItem, 'guestbook');
           }
+        }, () => {
+          setMainGbStatus('Firebase 읽기 권한 없음', false, true);
         });
 
         onValue(ref(db, 'buildingAnalyses'), (snap) => {
           const fbMap = normalizeFbMap(snap.val());
-          if (Object.keys(fbMap).length) {
-            state.userAnalyses = fbMap;
-            persistUserAnalyses();
-            if (state.openModalItem && state.openModalTab === 'analysis' && !document.getElementById('detailModal').classList.contains('hidden')) {
-              openDetailModal(state.openModalItem, 'analysis');
-            }
-          }
-        });
-
-        onValue(ref(db, 'birthdayTwins'), (snap) => {
-          const fbMap = normalizeFbMap(snap.val());
-          if (Object.keys(fbMap).length) {
-            state.birthdayTwins = fbMap;
-            persistBirthdayTwins();
-            renderCurrentView();
-            if (state.openModalItem && !document.getElementById('detailModal').classList.contains('hidden')) {
-              openDetailModal(state.openModalItem, state.openModalTab);
-            }
+          state.userAnalyses = fbMap;
+          persistUserAnalyses();
+          if (state.openModalItem && state.openModalTab === 'analysis' && !document.getElementById('detailModal').classList.contains('hidden')) {
+            openDetailModal(state.openModalItem, 'analysis');
           }
         });
 
         onValue(ref(db, 'architectAnalyses'), (snap) => {
           const fbMap = normalizeFbMap(snap.val());
-          if (Object.keys(fbMap).length) {
-            state.architectAnalyses = fbMap;
-            persistArchitectAnalyses();
-            if (state.openModalItem && state.openModalTab === 'architect' && !document.getElementById('detailModal').classList.contains('hidden')) {
-              openDetailModal(state.openModalItem, 'architect');
-            }
+          state.architectAnalyses = fbMap;
+          persistArchitectAnalyses();
+          if (state.openModalItem && state.openModalTab === 'architect' && !document.getElementById('detailModal').classList.contains('hidden')) {
+            openDetailModal(state.openModalItem, 'architect');
+          }
+        });
+
+        onValue(ref(db, 'birthdayTwins'), (snap) => {
+          const fbMap = normalizeFbMap(snap.val());
+          state.birthdayTwins = fbMap;
+          persistBirthdayTwins();
+          renderCurrentView();
+          if (state.openModalItem && !document.getElementById('detailModal').classList.contains('hidden')) {
+            openDetailModal(state.openModalItem, state.openModalTab);
           }
         });
       } catch (e) {
-        // Fallback to localStorage if Firebase is unreachable
+        setMainGbStatus('로컬 저장 모드', false, false);
       }
     }
 
-    // 공용 방명록(giscus) 설정: https://giscus.app/ko 에서 repoId, categoryId를 발급받아 입력하면 전 세계 방문자 공용 댓글이 활성화됩니다.
     const GISCUS_CONFIG = {
       repo: 'Spacecap-MS/Archbirthday',
       repoId: '',
@@ -1531,7 +1563,7 @@
       persistGuestbook();
       if (state.fbApi) {
         const { db, ref, set } = state.fbApi;
-        set(ref(db, `guestbook/${safeId}/${entryId}`), entry).catch(() => {});
+        set(ref(db, `guestbook/${safeId}/${entryId}`), entry).catch(() => { setMainGbStatus('Firebase 쓰기 권한 없음', false, true); showToast('공용 서버 저장 실패: Firebase 규칙을 확인해 주세요.'); });
       }
     }
 
